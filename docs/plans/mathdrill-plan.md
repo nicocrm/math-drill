@@ -8,53 +8,61 @@
 
 ## 1. Project Structure
 
+The project uses Next.js with a `src/` directory. Path alias `@/*` maps to `./src/*`.
+
 ```
-mathdrill/
-├── app/
-│   ├── layout.tsx
-│   ├── page.tsx                   # Home: list available exercise sets
-│   ├── admin/
-│   │   └── page.tsx               # Upload + ingestion status page
-│   ├── session/
-│   │   └── [exerciseId]/
-│   │       └── page.tsx           # Exercise player
-│   ├── results/
-│   │   └── [sessionId]/
-│   │       └── page.tsx           # Score summary
-│   └── api/
-│       ├── exercises/
-│       │   └── route.ts           # GET: list all exercise sets
-│       ├── exercises/[id]/
-│       │   └── route.ts           # GET: fetch one exercise set JSON
-│       ├── ingest/
-│       │   └── route.ts           # POST: receive PDF, trigger extraction
-│       └── ingest/status/
-│           └── route.ts           # GET: SSE stream of ingestion progress
-├── components/
-│   ├── DropZone.tsx               # react-dropzone upload widget
-│   ├── IngestionStatus.tsx        # SSE-fed live status display
-│   ├── ExercisePlayer.tsx         # Renders one exercise at a time
-│   ├── QuestionRenderer.tsx       # Dispatches to the right input type
-│   ├── inputs/
-│   │   ├── MultipleChoiceInput.tsx
-│   │   ├── TrueFalseInput.tsx
-│   │   ├── FractionInput.tsx      # Accepts "3/5", "-2/3", etc.
-│   │   └── OpenTextInput.tsx      # For ungraded open questions
-│   ├── MathDisplay.tsx            # KaTeX wrapper (pure LaTeX)
-│   ├── PromptDisplay.tsx          # Mixed text + $...$ math renderer
-│   └── ScoreBoard.tsx             # End-of-session results
-├── lib/
-│   ├── claude.ts                  # Anthropic SDK wrapper
-│   ├── mathValidation.ts          # mathjs-based answer checking
-│   ├── exerciseStore.ts           # Read/write JSON files from ./exercises/
-│   └── sessionStore.ts            # localStorage read/write helpers (client-side)
+math-drill/
+├── src/
+│   ├── app/
+│   │   ├── layout.tsx
+│   │   ├── page.tsx               # Home: list available exercise sets
+│   │   ├── globals.css
+│   │   ├── admin/
+│   │   │   └── page.tsx           # Upload + ingestion status page
+│   │   ├── session/
+│   │   │   └── [exerciseId]/
+│   │   │       └── page.tsx       # Exercise player
+│   │   ├── results/
+│   │   │   └── [sessionId]/
+│   │   │       └── page.tsx       # Score summary
+│   │   └── api/
+│   │       ├── exercises/
+│   │       │   └── route.ts       # GET: list all exercise sets
+│   │       ├── exercises/[id]/
+│   │       │   └── route.ts       # GET: fetch one exercise set JSON
+│   │       ├── ingest/
+│   │       │   └── route.ts       # POST: receive PDF, trigger extraction
+│   │       └── ingest/status/
+│   │           └── route.ts       # GET: SSE stream of ingestion progress
+│   ├── components/
+│   │   ├── DropZone.tsx           # react-dropzone upload widget
+│   │   ├── IngestionStatus.tsx    # SSE-fed live status display
+│   │   ├── ExercisePlayer.tsx     # Renders one exercise at a time
+│   │   ├── QuestionRenderer.tsx   # Dispatches to the right input type
+│   │   ├── inputs/
+│   │   │   ├── MultipleChoiceInput.tsx
+│   │   │   ├── TrueFalseInput.tsx
+│   │   │   ├── FractionInput.tsx  # Accepts "3/5", "-2/3", etc.
+│   │   │   └── OpenTextInput.tsx  # For ungraded open questions
+│   │   ├── MathDisplay.tsx        # KaTeX wrapper (pure LaTeX)
+│   │   ├── PromptDisplay.tsx      # Mixed text + $...$ math renderer
+│   │   └── ScoreBoard.tsx         # End-of-session results
+│   ├── lib/
+│   │   ├── claude.ts              # Anthropic SDK wrapper
+│   │   ├── mathValidation.ts      # mathjs-based answer checking
+│   │   ├── exerciseStore.ts       # Read/write JSON files from ./exercises/
+│   │   └── sessionStore.ts        # localStorage read/write helpers (client-side)
+│   └── types/
+│       └── exercise.ts            # TypeScript interfaces
 ├── exercises/                     # Server-side JSON storage (gitignored)
 │   └── *.json
 ├── intake/                        # (optional) staging area for uploaded PDFs
 │   └── *.pdf
-├── types/
-│   └── exercise.ts                # TypeScript interfaces
-└── package.json
+├── docs/
+│   └── plans/
+├── package.json
+├── next.config.mjs
+└── tsconfig.json
 ```
 
 ---
@@ -427,7 +435,16 @@ All review problems have been resolved in the plan. No outstanding fixes remain.
 
 ---
 
-## 11. Out of Scope (MVP)
+## 11. Sub-Plans
+
+| Sub-Plan | Purpose |
+|----------|---------|
+| [Initial Scaffolding](./initial-scaffolding-subplan.md) | Project structure, types, placeholder routes/components |
+| [E2E Testing](./e2e-testing-subplan.md) | Playwright-based end-to-end test framework and test suite |
+
+---
+
+## 12. Out of Scope (MVP)
 
 - Multi-user / authentication
 - Exercise editing UI after ingestion

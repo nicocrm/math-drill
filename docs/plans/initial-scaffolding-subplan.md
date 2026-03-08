@@ -24,6 +24,18 @@
 
 ---
 
+## Current Project State (Scaffolded)
+
+The project was bootstrapped with `create-next-app` and uses:
+
+- **`src/` directory** — All app code lives under `src/`. Path alias `@/*` → `./src/*`.
+- **Existing:** `src/app/layout.tsx`, `src/app/page.tsx`, `src/app/globals.css`, `src/app/fonts/` (Geist), Tailwind, ESLint, TypeScript.
+- **Not yet created:** admin/session/results pages, API routes, `components/`, `lib/`, `types/`, `exercises/`, `intake/`.
+- **`package.json`** — Name is `"math-drill"` ✓. Missing: `@anthropic-ai/sdk`, `katex`, `mathjs`, `react-dropzone`, `uuid`, `zod`.
+- **`.gitignore`** — Does not yet include `exercises/` or `intake/`.
+
+---
+
 ## Prerequisites
 
 - Node.js 18+
@@ -33,61 +45,57 @@
 
 ## Steps
 
-### 1. Initialize Next.js Project
+### 1. Initialize Next.js Project — DONE
 
-```bash
-npx create-next-app@14 . --typescript --tailwind --eslint --app --src-dir=false --import-alias="@/*"
-```
+The project already exists with Next.js 14, TypeScript, Tailwind, ESLint, and `src/` directory.
 
-- Use `.` to create in current directory (MathDrill root)
-- Do **not** add `turbopack` if prompted (optional, can add later)
-- This creates `app/`, `public/`, `next.config.js`, `tsconfig.json`, `package.json`, `.eslintrc.json`
-
-**Adjustments after init:**
-- Set `package.json` `"name"` to `"math-drill"` (npm convention: lowercase, hyphen-separated; no uppercase)
+**Remaining adjustments:**
 - Add `exercises/` and `intake/` to `.gitignore` (they are server-side storage)
-- Ensure `app/` layout matches plan (see Step 2)
+- Create directories and files per Step 2
 
 ---
 
 ### 2. Create Directory Structure
 
-Create the following directories and placeholder files so the structure exists:
+Create the following under `src/` (layout, page, globals.css already exist):
 
 ```
-app/
-├── layout.tsx              (already exists from create-next-app)
-├── page.tsx                 (replace with minimal home placeholder)
-├── admin/
-│   └── page.tsx             (create)
-├── session/
-│   └── [exerciseId]/
-│       └── page.tsx         (create)
-├── results/
-│   └── [sessionId]/
-│       └── page.tsx         (create)
-└── api/
-    ├── exercises/
-    │   └── route.ts         (create)
-    ├── exercises/[id]/
-    │   └── route.ts         (create)
-    ├── ingest/
-    │   └── route.ts         (create)
-    └── ingest/status/
-        └── route.ts         (create)
+src/
+├── app/
+│   ├── layout.tsx           (exists — update metadata for MathDrill)
+│   ├── page.tsx             (replace with minimal home placeholder)
+│   ├── admin/
+│   │   └── page.tsx         (create)
+│   ├── session/
+│   │   └── [exerciseId]/
+│   │       └── page.tsx     (create)
+│   ├── results/
+│   │   └── [sessionId]/
+│   │       └── page.tsx     (create)
+│   └── api/
+│       ├── exercises/
+│       │   └── route.ts     (create)
+│       ├── exercises/[id]/
+│       │   └── route.ts     (create)
+│       ├── ingest/
+│       │   └── route.ts     (create)
+│       └── ingest/status/
+│           └── route.ts     (create)
+├── components/              (create directory)
+├── lib/                     (create directory)
+└── types/                   (create directory)
 
-components/                  (create directory)
-lib/                         (create directory)
-types/                       (create directory)
-exercises/                   (create, gitignored)
-intake/                      (create, gitignored)
+exercises/                   (create at project root, gitignored)
+intake/                      (create at project root, gitignored)
 ```
+
+Note: `exercises/` and `intake/` live at project root (alongside `src/`), not inside `src/`, since they are server-side data directories.
 
 ---
 
 ### 3. Add Type Definitions
 
-Create `types/exercise.ts` with the full interfaces from the main plan (Section 2):
+Create `src/types/exercise.ts` with the full interfaces from the main plan (Section 2):
 
 - `QuestionType`
 - `Choice`
@@ -157,19 +165,19 @@ Use Next.js `Link` for navigation between `/` and `/admin`. No styling beyond de
 
 ### 8. Create Stub Components
 
-Create empty or minimal components so imports resolve:
+Create empty or minimal components under `src/components/` so imports resolve:
 
 | Component | Location | Content |
 |-----------|----------|---------|
-| `DropZone` | `components/DropZone.tsx` | `<div>Drop PDF here (stub)</div>` |
-| `IngestionStatus` | `components/IngestionStatus.tsx` | `<div>Ingestion status (stub)</div>` |
-| `ExercisePlayer` | `components/ExercisePlayer.tsx` | `<div>Exercise player (stub)</div>` |
-| `QuestionRenderer` | `components/QuestionRenderer.tsx` | `<div>Question (stub)</div>` |
-| `MathDisplay` | `components/MathDisplay.tsx` | `<span>{latex}</span>` (no KaTeX yet) |
-| `PromptDisplay` | `components/PromptDisplay.tsx` | `<span>{text}</span>` (no math parsing) |
-| `ScoreBoard` | `components/ScoreBoard.tsx` | `<div>Score (stub)</div>` |
+| `DropZone` | `src/components/DropZone.tsx` | `<div>Drop PDF here (stub)</div>` |
+| `IngestionStatus` | `src/components/IngestionStatus.tsx` | `<div>Ingestion status (stub)</div>` |
+| `ExercisePlayer` | `src/components/ExercisePlayer.tsx` | `<div>Exercise player (stub)</div>` |
+| `QuestionRenderer` | `src/components/QuestionRenderer.tsx` | `<div>Question (stub)</div>` |
+| `MathDisplay` | `src/components/MathDisplay.tsx` | `<span>{latex}</span>` (no KaTeX yet) |
+| `PromptDisplay` | `src/components/PromptDisplay.tsx` | `<span>{text}</span>` (no math parsing) |
+| `ScoreBoard` | `src/components/ScoreBoard.tsx` | `<div>Score (stub)</div>` |
 
-Create `components/inputs/` directory with stubs:
+Create `src/components/inputs/` directory with stubs:
 
 - `MultipleChoiceInput.tsx` → `<div>Multiple choice (stub)</div>`
 - `TrueFalseInput.tsx` → `<div>True/False (stub)</div>`
@@ -184,10 +192,10 @@ Create placeholder modules so imports don’t break:
 
 | Module | Content |
 |--------|---------|
-| `lib/claude.ts` | Export empty object or `export async function extractExercises() { throw new Error("Not implemented") }` |
-| `lib/mathValidation.ts` | Export `checkFraction` and `checkExpression` as stub functions returning `false` |
-| `lib/exerciseStore.ts` | Export `listExercises()` → `[]`, `getExercise(id)` → `null` |
-| `lib/sessionStore.ts` | Export `getSession()`, `saveSession()` as no-op or localStorage stubs |
+| `src/lib/claude.ts` | Export empty object or `export async function extractExercises() { throw new Error("Not implemented") }` |
+| `src/lib/mathValidation.ts` | Export `checkFraction` and `checkExpression` as stub functions returning `false` |
+| `src/lib/exerciseStore.ts` | Export `listExercises()` → `[]`, `getExercise(id)` → `null` |
+| `src/lib/sessionStore.ts` | Export `getSession()`, `saveSession()` as no-op or localStorage stubs |
 
 ---
 
@@ -200,21 +208,21 @@ npm run dev
 
 - Build must succeed with no TypeScript errors
 - Dev server must start
-- Navigate to `/`, `/admin`, `/session/foo`, `/results/bar` — all should render without errors
+- Navigate to `/`, `/admin`, `/session/foo`, `/results/bar` — all should render without errors (use `Link` from `next/link` for internal navigation)
 - `/api/exercises` and `/api/ingest/status` should return valid JSON
 
 ---
 
 ## Completion Criteria
 
-- [ ] `package.json` `"name"` is `"math-drill"` (npm convention)
+- [x] `package.json` `"name"` is `"math-drill"` (npm convention)
 - [ ] `npm run build` passes
 - [ ] `npm run dev` starts without errors
-- [ ] All routes in the project structure exist (pages + API)
-- [ ] All stub components and lib modules exist and are importable
-- [ ] Types in `types/exercise.ts` match the main plan
+- [ ] All routes in the project structure exist (pages + API) under `src/app/`
+- [ ] All stub components and lib modules exist under `src/components/` and `src/lib/`
+- [ ] Types in `src/types/exercise.ts` match the main plan
 - [ ] `.env.example` exists; `.env.local` is gitignored
-- [ ] `exercises/` and `intake/` directories exist and are gitignored
+- [ ] `exercises/` and `intake/` directories exist at project root and are gitignored
 
 ---
 
