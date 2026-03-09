@@ -7,7 +7,7 @@
 
 ## Overview
 
-This plan implements the remainder of MathDrill after scaffolding and E2E test framework setup. The scaffolding provides: Next.js structure, types, placeholder routes/components, and Playwright tests. This plan delivers: ingestion pipeline (PDF → Claude → JSON), math rendering/validation, exercise player with interactive inputs, results page, and home page exercise listing.
+This plan implements the remainder of MathDrill after scaffolding and E2E test framework setup. The scaffolding provides: Next.js structure, types, placeholder routes/components, and Playwright tests. This plan delivers: ingestion pipeline (PDF → LLM extraction → JSON), math rendering/validation, exercise player with interactive inputs, results page, and home page exercise listing. The extraction provider is currently Anthropic (Claude); see [Anthropic → OpenAI Migration](./2025-03-09-anthropic-to-openai-migration.md) for switching to OpenAI.
 
 ## Current State
 
@@ -540,7 +540,7 @@ Add mock exercise fixture, extend E2E tests for ingestion, session, and results 
 
 - exerciseStore: consider unit tests for list/get/save with temp dir
 - mathValidation: unit tests for checkFraction, checkExpression, checkMultipleChoice, checkTrueFalse
-- Claude: integration test with fixture PDF (optional, may require API key)
+- Extraction provider (Claude/OpenAI): integration test with fixture PDF (optional, may require API key)
 
 ### Frontend
 
@@ -557,7 +557,7 @@ Add mock exercise fixture, extend E2E tests for ingestion, session, and results 
 
 - [ ] No database — file-based storage only
 - [ ] No auth — single-user local app
-- [ ] Env: `ANTHROPIC_API_KEY`, `EXERCISES_DIR`, `INTAKE_DIR`
+- [ ] Env: `ANTHROPIC_API_KEY` or `OPENAI_API_KEY` (per [migration plan](./2025-03-09-anthropic-to-openai-migration.md)), `EXERCISES_DIR`, `INTAKE_DIR`
 - [ ] `exercises/` and `intake/` gitignored
 
 ## Migration Notes
@@ -570,3 +570,4 @@ Add mock exercise fixture, extend E2E tests for ingestion, session, and results 
 - Main plan: `docs/plans/mathdrill-plan.md`
 - Initial scaffolding: `docs/plans/implemented/initial-scaffolding-subplan.md`
 - E2E testing: `docs/plans/implemented/e2e-testing-subplan.md`
+- [Anthropic → OpenAI Migration](./2025-03-09-anthropic-to-openai-migration.md) — plan for switching extraction provider

@@ -17,7 +17,7 @@
 - Environment variable template
 
 **Out of scope:**
-- Real ingestion logic, Claude integration, or PDF handling
+- Real ingestion logic, LLM integration (Claude/OpenAI), or PDF handling
 - Real exercise storage or session persistence
 - Math rendering (KaTeX), validation (mathjs), or interactive inputs
 - Styling beyond minimal layout (Tailwind or plain CSS)

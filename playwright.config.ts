@@ -1,6 +1,12 @@
 import { defineConfig, devices } from "@playwright/test";
+import * as os from "os";
+import * as path from "path";
 
 const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3002;
+
+// Use temp dirs for e2e so home/navigation tests see empty state (no exercises)
+const E2E_EXERCISES_DIR = path.join(os.tmpdir(), "math-drill-e2e-exercises");
+const E2E_INTAKE_DIR = path.join(os.tmpdir(), "math-drill-e2e-intake");
 
 export default defineConfig({
   testDir: "./tests/e2e",
@@ -18,5 +24,10 @@ export default defineConfig({
     command: `npx next dev -p ${PORT}`,
     url: `http://localhost:${PORT}`,
     reuseExistingServer: !process.env.CI,
+    env: {
+      ...process.env,
+      EXERCISES_DIR: E2E_EXERCISES_DIR,
+      INTAKE_DIR: E2E_INTAKE_DIR,
+    },
   },
 });

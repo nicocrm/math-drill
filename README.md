@@ -24,8 +24,8 @@ No database, no auth, no multi-user. Single local process.
 | **Pages** | `/` (home), `/admin` (upload), `/session/[exerciseId]`, `/results/[sessionId]` |
 | **API routes** | `/api/exercises`, `/api/exercises/[id]`, `/api/ingest`, `/api/ingest/status` |
 | **Components** | DropZone, IngestionStatus, ExercisePlayer, QuestionRenderer, MathDisplay, PromptDisplay, ScoreBoard, input components |
-| **Lib modules** | `claude.ts`, `mathValidation.ts`, `exerciseStore.ts`, `sessionStore.ts` |
-| **Dependencies** | @anthropic-ai/sdk, katex, mathjs, react-dropzone, uuid, zod |
+| **Lib modules** | `extractExercises.ts`, `extraction/*`, `mathValidation.ts`, `exerciseStore.ts`, `sessionStore.ts` |
+| **Dependencies** | @anthropic-ai/sdk, openai, katex, mathjs, react-dropzone, uuid, zod |
 | **E2E tests** | Playwright; navigation, home, admin, session, results, API smoke |
 
 ### Not Yet Implemented (Stubs / Placeholders)
@@ -42,7 +42,7 @@ No database, no auth, no multi-user. Single local process.
 
 ## Getting Started
 
-1. Copy `.env.example` to `.env.local` and add your `ANTHROPIC_API_KEY`.
+1. Copy `.env.example` to `.env.local` and add your API key(s). Use `ANTHROPIC_API_KEY` for Anthropic (default) or `OPENAI_API_KEY` with `EXTRACTION_PROVIDER=openai` for OpenAI.
 2. Install dependencies and run the dev server:
 
 ```bash
@@ -78,7 +78,9 @@ npx playwright show-report
 
 | Variable | Description |
 |----------|-------------|
-| `ANTHROPIC_API_KEY` | Required for PDF extraction (Claude API) |
+| `EXTRACTION_PROVIDER` | `anthropic` (default) or `openai` |
+| `ANTHROPIC_API_KEY` | Required when using Anthropic (Claude API) |
+| `OPENAI_API_KEY` | Required when using OpenAI |
 | `EXERCISES_DIR` | Path to JSON storage (default: `./exercises`) |
 | `INTAKE_DIR` | Path for uploaded PDFs (default: `./intake`) |
 

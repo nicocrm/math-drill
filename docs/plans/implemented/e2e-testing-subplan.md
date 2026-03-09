@@ -18,7 +18,7 @@
 - Unit tests (separate plan if needed)
 - Visual regression / screenshot comparison
 - Performance benchmarks
-- Testing Claude API or PDF extraction logic directly (those are integration tests; E2E assumes mocked or real backend)
+- Testing extraction provider API (Claude/OpenAI) or PDF extraction logic directly (those are integration tests; E2E assumes mocked or real backend)
 
 ---
 

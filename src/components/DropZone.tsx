@@ -1,22 +1,49 @@
 "use client";
 
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import { Card } from "@/components/ui/Card";
 
-export function DropZone() {
-  const onDrop = useCallback((acceptedFiles: File[]) => {
-    if (acceptedFiles.length > 0) {
-      // TODO: implement upload
-      console.log("Dropped files:", acceptedFiles);
-    }
-  }, []);
+interface DropZoneProps {
+  onJobStarted?: (jobId: string) => void;
+}
+
+export function DropZone({ onJobStarted }: DropZoneProps) {
+  const [uploading, setUploading] = useState(false);
+
+  const onDrop = useCallback(
+    async (acceptedFiles: File[]) => {
+      if (acceptedFiles.length === 0) return;
+      const file = acceptedFiles[0];
+      setUploading(true);
+      try {
+        const formData = new FormData();
+        formData.append("file", file);
+        const res = await fetch("/api/ingest", {
+          method: "POST",
+          body: formData,
+        });
+        if (!res.ok) {
+          throw new Error("Upload failed");
+        }
+        const data = (await res.json()) as { jobId: string };
+        if (data.jobId) {
+          onJobStarted?.(data.jobId);
+        }
+      } catch {
+        setUploading(false);
+      } finally {
+        setUploading(false);
+      }
+    },
+    [onJobStarted]
+  );
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
     accept: { "application/pdf": [".pdf"] },
     maxFiles: 1,
-    disabled: false,
+    disabled: uploading,
   });
 
   return (
@@ -26,7 +53,7 @@ export function DropZone() {
         isDragActive
           ? "border-primary bg-primary/5"
           : "border-zinc-300 hover:border-primary/50 dark:border-zinc-600 dark:hover:border-primary/50"
-      }`}
+      } ${uploading ? "pointer-events-none opacity-60" : ""}`}
     >
       <input {...getInputProps()} />
       <div className="flex flex-col items-center justify-center gap-2 py-8 text-center">
@@ -44,7 +71,11 @@ export function DropZone() {
           />
         </svg>
         <p className="text-foreground font-medium">
-          {isDragActive ? "Drop your PDF here" : "Drag & drop a PDF here"}
+          {uploading
+            ? "Uploading..."
+            : isDragActive
+              ? "Drop your PDF here"
+              : "Drag & drop a PDF here"}
         </p>
         <p className="text-sm text-muted-foreground">or click to browse</p>
       </div>

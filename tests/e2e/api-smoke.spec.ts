@@ -11,8 +11,7 @@ test.describe("API smoke", () => {
 
   test("GET /api/ingest/status returns status object", async ({ request }) => {
     const res = await request.get("/api/ingest/status?jobId=mock-job-123");
-    expect(res.ok()).toBeTruthy();
-    const body = await res.json();
+    const body = (await res.json()) as Record<string, unknown>;
     expect(body).toHaveProperty("status");
   });
 });

@@ -1,0 +1,66 @@
+{
+  "id": "mock-exercise-1",
+  "filename": "mock-exercise.pdf",
+  "title": "Mock Math Exercise",
+  "subject": "Algebra",
+  "createdAt": "2025-03-09T12:00:00.000Z",
+  "sections": [
+    { "id": "s1", "label": "Section 1", "maxPoints": 10 }
+  ],
+  "questions": [
+    {
+      "id": "q1",
+      "type": "multiple_choice",
+      "section": "Section 1",
+      "points": 2,
+      "prompt": "What is $2 + 2$?",
+      "choices": [
+        { "id": "a", "latex": "3" },
+        { "id": "b", "latex": "4" },
+        { "id": "c", "latex": "5" }
+      ],
+      "answerMath": ["b"],
+      "answerLatex": "4",
+      "requiresSteps": false
+    },
+    {
+      "id": "q2",
+      "type": "true_false",
+      "section": "Section 1",
+      "points": 2,
+      "prompt": "$3 \\times 4 = 12$",
+      "answerMath": "true",
+      "answerLatex": "true",
+      "requiresSteps": false
+    },
+    {
+      "id": "q3",
+      "type": "numeric",
+      "section": "Section 1",
+      "points": 2,
+      "prompt": "Simplify $\\frac{2}{4}$",
+      "answerMath": "1/2",
+      "answerLatex": "\\frac{1}{2}",
+      "requiresSteps": false
+    },
+    {
+      "id": "q4",
+      "type": "expression",
+      "section": "Section 1",
+      "points": 2,
+      "prompt": "Calculate $5 + 3$",
+      "answerMath": "8",
+      "answerLatex": "8",
+      "requiresSteps": false
+    },
+    {
+      "id": "q5",
+      "type": "open",
+      "section": "Section 1",
+      "points": 2,
+      "prompt": "Explain why $1 + 1 = 2$.",
+      "answerMath": null,
+      "requiresSteps": false
+    }
+  ]
+}
