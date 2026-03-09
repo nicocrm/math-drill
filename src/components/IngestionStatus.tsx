@@ -12,6 +12,7 @@ interface StatusData {
   status: string;
   progress?: number;
   exerciseId?: string;
+  questionCount?: number;
   error?: string;
 }
 
@@ -74,6 +75,11 @@ export function IngestionStatus({ jobId }: IngestionStatusProps) {
     return (
       <div className="rounded-xl border border-success/50 bg-success/10 px-4 py-3 text-sm text-success dark:border-success/30">
         <p className="font-medium">Done!</p>
+        {status.questionCount !== undefined && (
+          <p className="text-muted-foreground">
+            {status.questionCount} exercises extracted.
+          </p>
+        )}
         <Link
           href={`/session/${status.exerciseId}`}
           className="underline hover:no-underline"

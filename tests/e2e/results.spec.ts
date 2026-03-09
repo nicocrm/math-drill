@@ -73,6 +73,8 @@ test.describe("Results", () => {
     await expect(
       page.getByRole("heading", { name: "Results" })
     ).toBeVisible();
+    await expect(page.getByText("By section")).toBeVisible();
+    await expect(page.getByText("Section 1: 8/10 pts")).toBeVisible();
     await expect(page.getByText("Per-question review")).toBeVisible();
     await expect(page.getByRole("button", { name: "Try again" })).toBeVisible();
     await expect(page.getByRole("button", { name: "Back to Home" })).toBeVisible();

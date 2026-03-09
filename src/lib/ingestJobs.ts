@@ -16,6 +16,7 @@ export interface JobState {
   progress?: number;
   step?: IngestStep;
   exerciseId?: string;
+  questionCount?: number;
   error?: string;
 }
 

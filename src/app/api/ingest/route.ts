@@ -36,7 +36,11 @@ async function runIngestJob(
     updateProgress(jobId, "saving_exercise");
     await saveExercise(exercise);
 
-    updateProgress(jobId, "done", { exerciseId, status: "done" });
+    updateProgress(jobId, "done", {
+      exerciseId,
+      status: "done",
+      questionCount: exercise.questions.length,
+    });
   } catch (err) {
     const error = err instanceof Error ? err.message : String(err);
     setJob(jobId, {

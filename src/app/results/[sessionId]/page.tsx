@@ -71,6 +71,19 @@ export default function ResultsPage() {
   const correctCount = session.answers.filter((a) => a.isCorrect === true).length;
   const totalQuestions = session.answers.length;
 
+  type SectionBreakdown = { label: string; earned: number; maxPoints: number };
+  const sectionBreakdowns: SectionBreakdown[] =
+    exercise?.sections?.map((sec) => {
+      const questionsInSection = exercise.questions.filter(
+        (q) => q.section === sec.label
+      );
+      const maxPoints = sec.maxPoints;
+      const earned = session.answers
+        .filter((a) => questionsInSection.some((q) => q.id === a.questionId))
+        .reduce((s, a) => s + a.pointsAwarded, 0);
+      return { label: sec.label, earned, maxPoints };
+    }) ?? [];
+
   const getQuestion = (questionId: string): Question | undefined =>
     exercise?.questions?.find((q) => q.id === questionId);
 
@@ -83,6 +96,18 @@ export default function ResultsPage() {
           correct={correctCount}
           totalQuestions={totalQuestions}
         />
+        {sectionBreakdowns.length > 0 && (
+          <Card className="flex flex-col gap-2">
+            <h2 className="font-semibold text-foreground">By section</h2>
+            <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-muted-foreground">
+              {sectionBreakdowns.map((sb) => (
+                <span key={sb.label}>
+                  {sb.label}: {sb.earned}/{sb.maxPoints} pts
+                </span>
+              ))}
+            </div>
+          </Card>
+        )}
         <Card className="flex flex-col gap-4">
           <h2 className="font-semibold text-foreground">Per-question review</h2>
           {session.answers.map((answer) => {

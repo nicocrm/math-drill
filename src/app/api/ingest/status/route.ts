@@ -56,6 +56,9 @@ export async function GET(request: NextRequest) {
               step: "done",
               progress: 100,
               ...(job.exerciseId && { exerciseId: job.exerciseId }),
+              ...(job.questionCount !== undefined && {
+                questionCount: job.questionCount,
+              }),
               ...(job.error && { error: job.error }),
             });
             controller.close();
@@ -90,6 +93,9 @@ export async function GET(request: NextRequest) {
     status: job.status,
     ...(job.progress !== undefined && { progress: job.progress }),
     ...(job.exerciseId && { exerciseId: job.exerciseId }),
+    ...(job.questionCount !== undefined && {
+      questionCount: job.questionCount,
+    }),
     ...(job.error && { error: job.error }),
   });
 }
