@@ -439,8 +439,9 @@ All review problems have been resolved in the plan. No outstanding fixes remain.
 
 | Sub-Plan | Purpose |
 |----------|---------|
-| [Initial Scaffolding](./initial-scaffolding-subplan.md) | Project structure, types, placeholder routes/components |
-| [E2E Testing](./e2e-testing-subplan.md) | Playwright-based end-to-end test framework and test suite |
+| [Initial Scaffolding](./implemented/initial-scaffolding-subplan.md) | Project structure, types, placeholder routes/components |
+| [E2E Testing](./implemented/e2e-testing-subplan.md) | Playwright-based end-to-end test framework and test suite |
+| [Remainder Implementation](./2025-03-09-mathdrill-remainder-implementation.md) | Phased plan: ingestion, math rendering/validation, exercise player, home/results, E2E |
 
 ---
 
