@@ -1,4 +1,6 @@
-import Link from "next/link";
+import { PageLayout } from "@/components/PageLayout";
+import { Button } from "@/components/ui/Button";
+import { Card } from "@/components/ui/Card";
 
 export default async function SessionPage({
   params,
@@ -7,20 +9,16 @@ export default async function SessionPage({
 }) {
   const { exerciseId } = await params;
   return (
-    <div className="min-h-screen p-8 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-6 max-w-2xl mx-auto">
-        <h1 className="text-2xl font-bold">Exercise session</h1>
-        <p className="text-muted-foreground">
-          Exercise ID: {exerciseId}
-        </p>
-        <p>Not implemented</p>
-        <Link
-          href="/"
-          className="text-primary hover:underline underline-offset-4"
-        >
+    <PageLayout
+      title="Exercise session"
+      subtitle={`Exercise ID: ${exerciseId}`}
+    >
+      <Card>
+        <p className="text-muted-foreground">Not implemented</p>
+        <Button href="/" variant="outline" size="md" className="mt-4">
           Back to Home
-        </Link>
-      </main>
-    </div>
+        </Button>
+      </Card>
+    </PageLayout>
   );
 }

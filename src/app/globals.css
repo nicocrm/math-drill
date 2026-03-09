@@ -3,25 +3,56 @@
 @tailwind utilities;
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #fafaf9;
+  --foreground: #18181b;
+  --primary: #14b8a6;
+  --primary-hover: #0d9488;
+  --primary-foreground: #ffffff;
+  --accent: #f97316;
+  --accent-foreground: #ffffff;
+  --muted: #f4f4f5;
+  --muted-foreground: #71717a;
+  --card: #ffffff;
+  --card-foreground: #18181b;
+  --success: #22c55e;
+  --error: #ef4444;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: #18181b;
+    --foreground: #fafafa;
+    --primary: #2dd4bf;
+    --primary-hover: #5eead4;
+    --primary-foreground: #0f172a;
+    --accent: #fb923c;
+    --accent-foreground: #0f172a;
+    --muted: #27272a;
+    --muted-foreground: #a1a1aa;
+    --card: #27272a;
+    --card-foreground: #fafafa;
+    --success: #4ade80;
+    --error: #f87171;
   }
 }
 
 body {
   color: var(--foreground);
   background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-geist-sans), system-ui, sans-serif;
+  font-size: 1rem;
+  line-height: 1.6;
 }
 
 @layer utilities {
   .text-balance {
     text-wrap: balance;
+  }
+}
+
+/* Focus ring for accessibility */
+@layer base {
+  *:focus-visible {
+    @apply outline-2 outline-offset-2 outline-primary;
   }
 }

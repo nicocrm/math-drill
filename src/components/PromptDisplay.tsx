@@ -3,5 +3,7 @@ interface PromptDisplayProps {
 }
 
 export function PromptDisplay({ text }: PromptDisplayProps) {
-  return <span>{text}</span>;
+  return (
+    <span className="leading-relaxed text-foreground">{text}</span>
+  );
 }
