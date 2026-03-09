@@ -26,6 +26,7 @@ No database, no auth, no multi-user. Single local process.
 | **Components** | DropZone, IngestionStatus, ExercisePlayer, QuestionRenderer, MathDisplay, PromptDisplay, ScoreBoard, input components |
 | **Lib modules** | `claude.ts`, `mathValidation.ts`, `exerciseStore.ts`, `sessionStore.ts` |
 | **Dependencies** | @anthropic-ai/sdk, katex, mathjs, react-dropzone, uuid, zod |
+| **E2E tests** | Playwright; navigation, home, admin, session, results, API smoke |
 
 ### Not Yet Implemented (Stubs / Placeholders)
 
@@ -50,6 +51,28 @@ npm run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000). Navigate between Home (`/`) and Upload (`/admin`).
+
+## Running Tests
+
+End-to-end tests use [Playwright](https://playwright.dev/). Run them with:
+
+```bash
+npm run test:e2e
+```
+
+This command starts the dev server on port 3002 (to avoid conflicts with a running dev instance), runs the E2E test suite in Chromium, and shuts down when complete.
+
+**First-time setup:** Playwright installs Chromium automatically. If you need to install browsers manually:
+
+```bash
+npx playwright install chromium
+```
+
+**View test report:** After a run, open the HTML report with:
+
+```bash
+npx playwright show-report
+```
 
 ## Environment Variables
 
