@@ -88,7 +88,7 @@ export function IngestionStatus({ jobId }: IngestionStatusProps) {
     <div className="rounded-xl border border-zinc-200 bg-muted/50 px-4 py-3 text-sm text-muted-foreground dark:border-zinc-700">
       <p className="font-medium capitalize">{status.status}</p>
       {status.progress !== undefined && (
-        <p>Progress: {Math.round(status.progress * 100)}%</p>
+        <p>Progress: {Math.round(status.progress)}%</p>
       )}
     </div>
   );
