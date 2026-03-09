@@ -9,16 +9,26 @@ interface MathDisplayProps {
   block?: boolean;
 }
 
+/** Strip optional $...$ delimiters; KaTeX expects raw LaTeX and errors on $ in math mode. */
+function stripDollarDelimiters(s: string): string {
+  const t = s.trim();
+  if (t.startsWith("$") && t.endsWith("$") && t.length > 1) {
+    return t.slice(1, -1).trim();
+  }
+  return t;
+}
+
 export function MathDisplay({ latex, block = false }: MathDisplayProps) {
   const html = useMemo(() => {
+    const normalized = stripDollarDelimiters(latex);
     try {
-      return katex.renderToString(latex, {
+      return katex.renderToString(normalized, {
         displayMode: block,
         throwOnError: false,
         output: "html",
       });
     } catch {
-      return latex;
+      return normalized;
     }
   }, [latex, block]);
 

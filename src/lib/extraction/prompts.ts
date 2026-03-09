@@ -21,7 +21,7 @@ Extract the exercise set from the PDF and return a single JSON object matching t
     "section": "string (section id)",
     "points": number,
     "prompt": "string (use $...$ for math, e.g. $\\\\frac{1}{2}$)",
-    "choices": [{ "id": "string", "latex": "string" }] (only for multiple_choice),
+    "choices": [{ "id": "string", "latex": "string (pure LaTeX, no $ delimiters)" }] (only for multiple_choice),
     "answerMath": "string | string[] | null",
     "answerLatex": "string (KaTeX for display)",
     "requiresSteps": boolean,
@@ -32,6 +32,7 @@ Extract the exercise set from the PDF and return a single JSON object matching t
 
 Rules:
 - For prompt text with math, use $...$ delimiters. LaTeX inside: e.g. $\\\\frac{1}{2}$ or $x^2$.
+- For choice.latex, use pure LaTeX only (no $ delimiters), e.g. \\\\left(\\\\frac{2}{3}\\\\right)^2.
 - answerMath: For numeric/expression use mathjs-evaluable string (e.g. "2/3", "(1/2)^3").
 - answerMath: For multiple_choice use string[] of correct choice ids.
 - answerMath: For true_false use "true" or "false".
