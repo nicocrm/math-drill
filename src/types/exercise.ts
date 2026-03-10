@@ -22,6 +22,7 @@ export interface Question {
   requiresSteps: boolean;
   requiresExample?: boolean; // For true_false: if true, student must provide a counterexample when answering "false"
   hint?: string; // Optional teacher hint
+  explanation?: string; // Concept explanation shown after answering
 }
 
 export interface ExerciseSet {

@@ -136,6 +136,12 @@ export function QuestionRenderer({
               Correct answer: <MathDisplay latex={question.answerLatex} />
             </p>
           )}
+          {question.explanation && (
+            <div className="mt-3 rounded-lg bg-muted/50 p-3 text-sm text-muted-foreground">
+              <h4 className="mb-1 font-medium text-foreground">Concept</h4>
+              <PromptDisplay text={question.explanation} />
+            </div>
+          )}
         </div>
       )}
     </div>

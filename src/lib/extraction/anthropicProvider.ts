@@ -1,6 +1,7 @@
 import Anthropic from "@anthropic-ai/sdk";
 import type { ExerciseSet } from "@/types/exercise";
 import { SYSTEM_PROMPT, parseAndValidateExerciseSet } from "./prompts";
+import { verifyExplanations } from "./verifyExplanations";
 
 export async function generateExercisesFromPdfAnthropic(
   pdfBase64: string,
@@ -39,5 +40,6 @@ export async function generateExercisesFromPdfAnthropic(
     throw new Error("Anthropic did not return text content");
   }
 
-  return parseAndValidateExerciseSet(textBlock.text);
+  const exerciseSet = parseAndValidateExerciseSet(textBlock.text);
+  return verifyExplanations(exerciseSet);
 }

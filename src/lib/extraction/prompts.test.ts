@@ -1,5 +1,11 @@
 import { describe, it, expect } from "vitest";
-import { validateAnswerMath } from "./prompts";
+import { readFileSync } from "fs";
+import { join } from "path";
+import {
+  validateAnswerMath,
+  SYSTEM_PROMPT,
+  parseAndValidateExerciseSet,
+} from "./prompts";
 
 describe("validateAnswerMath", () => {
   it("accepts null answerMath for open type", () => {
@@ -51,5 +57,38 @@ describe("validateAnswerMath", () => {
     expect(() =>
       validateAnswerMath({ id: "q1", type: "numeric", answerMath: "not a number" })
     ).toThrow("not a valid mathjs-evaluable numeric expression");
+  });
+});
+
+describe("SYSTEM_PROMPT - explanation", () => {
+  it("includes explanation in schema", () => {
+    expect(SYSTEM_PROMPT).toContain('"explanation"');
+  });
+
+  it("includes anti-hallucination rules", () => {
+    expect(SYSTEM_PROMPT).toContain("Do NOT invent");
+  });
+});
+
+describe("parseAndValidateExerciseSet - explanation", () => {
+  it("accepts exercise with explanations", () => {
+    const raw = readFileSync(
+      join(process.cwd(), "tests/fixtures/mock-exercise.json"),
+      "utf-8"
+    );
+    const result = parseAndValidateExerciseSet(raw);
+    const withExplanation = result.questions.filter((q) => q.explanation);
+    expect(withExplanation.length).toBeGreaterThan(0);
+  });
+
+  it("preserves explanation field", () => {
+    const raw = readFileSync(
+      join(process.cwd(), "tests/fixtures/mock-exercise.json"),
+      "utf-8"
+    );
+    const result = parseAndValidateExerciseSet(raw);
+    expect(result.questions[0].explanation).toBe(
+      "Addition combines two numbers to find their total."
+    );
   });
 });

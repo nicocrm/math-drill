@@ -21,7 +21,8 @@
       ],
       "answerMath": ["b"],
       "answerLatex": "4",
-      "requiresSteps": false
+      "requiresSteps": false,
+      "explanation": "Addition combines two numbers to find their total."
     },
     {
       "id": "q2",
@@ -31,7 +32,8 @@
       "prompt": "$3 \\times 4 = 12$",
       "answerMath": "true",
       "answerLatex": "true",
-      "requiresSteps": false
+      "requiresSteps": false,
+      "explanation": "Multiplication is repeated addition; $3 \\times 4$ means 3 groups of 4."
     },
     {
       "id": "q3",
@@ -41,7 +43,8 @@
       "prompt": "Simplify $\\frac{2}{4}$",
       "answerMath": "1/2",
       "answerLatex": "\\frac{1}{2}",
-      "requiresSteps": false
+      "requiresSteps": false,
+      "explanation": "To simplify a fraction, divide numerator and denominator by their greatest common factor."
     },
     {
       "id": "q4",

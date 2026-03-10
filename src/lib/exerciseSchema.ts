@@ -25,6 +25,7 @@ const questionSchema = z.object({
   requiresSteps: z.boolean(),
   requiresExample: z.boolean().optional(),
   hint: z.string().optional(),
+  explanation: z.string().optional(),
 });
 
 const sectionSchema = z.object({

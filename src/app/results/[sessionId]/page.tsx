@@ -144,6 +144,12 @@ export default function ResultsPage() {
                         Correct: <MathDisplay latex={q.answerLatex} />
                       </p>
                     )}
+                    {q.explanation && (
+                      <div className="mt-2 text-sm text-muted-foreground">
+                        <span className="font-medium text-foreground">Concept: </span>
+                        <PromptDisplay text={q.explanation} />
+                      </div>
+                    )}
                     <p className="mt-1 text-sm text-muted-foreground">
                       Your answer:{" "}
                       {Array.isArray(answer.value)

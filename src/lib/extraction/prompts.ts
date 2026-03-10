@@ -28,7 +28,8 @@ Return a single JSON object matching this schema:
     "answerLatex": "string (KaTeX for display)",
     "requiresSteps": boolean,
     "requiresExample": boolean (only for true_false, if counterexample needed when false),
-    "hint": "string (optional)"
+    "hint": "string (optional)",
+    "explanation": "string (optional)"
   }]
 }
 
@@ -40,6 +41,7 @@ Rules:
 - answerMath: For true_false use "true" or "false".
 - answerMath: For type "open" use null (ungraded).
 - answerLatex: KaTeX string for displaying the correct answer.
+- explanation: A brief, factual explanation of the mathematical concept being tested. Use only well-established mathematical facts. Do NOT invent examples, numbers, or derivations not present in the question. Ground the explanation in the concept itself (e.g., fraction simplification, order of operations), not in the specific numbers of this question. Keep it 1–3 sentences.
 - Return ONLY valid JSON, no markdown or extra text.`;
 
 export function validateAnswerMath(question: {

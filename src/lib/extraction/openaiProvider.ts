@@ -1,6 +1,7 @@
 import OpenAI from "openai";
 import type { ExerciseSet } from "@/types/exercise";
 import { SYSTEM_PROMPT, parseAndValidateExerciseSet } from "./prompts";
+import { verifyExplanations } from "./verifyExplanations";
 
 const OPENAI_MODEL = "gpt-4o";
 
@@ -39,5 +40,6 @@ export async function generateExercisesFromPdfOpenAI(
     throw new Error("OpenAI did not return text content");
   }
 
-  return parseAndValidateExerciseSet(outputText);
+  const exerciseSet = parseAndValidateExerciseSet(outputText);
+  return verifyExplanations(exerciseSet);
 }
