@@ -24,7 +24,7 @@ No database, no auth, no multi-user. Single local process.
 | **Pages** | `/` (home), `/admin` (upload), `/session/[exerciseId]`, `/results/[sessionId]` |
 | **API routes** | `/api/exercises`, `/api/exercises/[id]`, `/api/ingest`, `/api/ingest/status` |
 | **Components** | DropZone, IngestionStatus, ExercisePlayer, QuestionRenderer, MathDisplay, PromptDisplay, ScoreBoard, input components |
-| **Lib modules** | `extractExercises.ts`, `extraction/*`, `mathValidation.ts`, `exerciseStore.ts`, `sessionStore.ts` |
+| **Lib modules** | `generateExercisesFromPdf.ts`, `extraction/*`, `mathValidation.ts`, `exerciseStore.ts`, `sessionStore.ts` |
 | **Dependencies** | @anthropic-ai/sdk, openai, katex, mathjs, react-dropzone, uuid, zod |
 | **E2E tests** | Playwright; navigation, home, admin, session, results, API smoke |
 

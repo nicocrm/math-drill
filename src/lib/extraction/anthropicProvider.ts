@@ -2,7 +2,7 @@ import Anthropic from "@anthropic-ai/sdk";
 import type { ExerciseSet } from "@/types/exercise";
 import { SYSTEM_PROMPT, parseAndValidateExerciseSet } from "./prompts";
 
-export async function extractExercisesAnthropic(
+export async function generateExercisesFromPdfAnthropic(
   pdfBase64: string,
   filename: string
 ): Promise<ExerciseSet> {
@@ -27,7 +27,7 @@ export async function extractExercisesAnthropic(
           },
           {
             type: "text",
-            text: `Extract the exercise set from this PDF ("${filename}") and return a single JSON object. No markdown, no code block wrapper—just the raw JSON.`,
+            text: `Generate a NEW exercise set based on this PDF ("${filename}"). Use it as a reference for topic, difficulty, format, and style—but create fresh questions with different numbers and wording. Return a single JSON object. No markdown, no code block wrapper—just the raw JSON.`,
           },
         ],
       },

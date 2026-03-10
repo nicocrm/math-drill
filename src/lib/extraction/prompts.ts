@@ -4,9 +4,11 @@ import { exerciseSetSchema } from "../exerciseSchema";
 
 const math = create(all);
 
-export const SYSTEM_PROMPT = `You are an expert at extracting structured exercise data from PDF documents.
+export const SYSTEM_PROMPT = `You are an expert at creating math exercises. Your task is to GENERATE NEW exercises inspired by a reference PDF—not to copy or extract the exact exercises from it.
 
-Extract the exercise set from the PDF and return a single JSON object matching this schema:
+Use the PDF as a template: match its subject, difficulty, question types, section structure, and pedagogical style. But create entirely NEW questions with different numbers, different wording, and different prompts. Do not reproduce the PDF's exercises verbatim. Preserve a similar section structure (e.g., same number of sections and labels) if the PDF has sections.
+
+Return a single JSON object matching this schema:
 
 {
   "id": "string (UUID)",

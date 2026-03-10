@@ -1,5 +1,5 @@
 /**
- * @deprecated Use extractExercises from @/lib/extractExercises instead.
+ * @deprecated Use generateExercisesFromPdf from @/lib/generateExercisesFromPdf instead.
  * This file re-exports for backward compatibility.
  */
-export { extractExercises } from "./extractExercises";
+export { generateExercisesFromPdf } from "./generateExercisesFromPdf";

@@ -4,7 +4,7 @@ import { SYSTEM_PROMPT, parseAndValidateExerciseSet } from "./prompts";
 
 const OPENAI_MODEL = "gpt-4o";
 
-export async function extractExercisesOpenAI(
+export async function generateExercisesFromPdfOpenAI(
   pdfBase64: string,
   filename: string
 ): Promise<ExerciseSet> {
@@ -27,7 +27,7 @@ export async function extractExercisesOpenAI(
           },
           {
             type: "input_text",
-            text: `Extract the exercise set from this PDF ("${filename}") and return a single JSON object. No markdown, no code block wrapper—just the raw JSON.`,
+            text: `Generate a NEW exercise set based on this PDF ("${filename}"). Use it as a reference for topic, difficulty, format, and style—but create fresh questions with different numbers and wording. Return a single JSON object. No markdown, no code block wrapper—just the raw JSON.`,
           },
         ],
       },

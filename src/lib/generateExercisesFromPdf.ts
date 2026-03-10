@@ -1,6 +1,6 @@
 import type { ExerciseSet } from "@/types/exercise";
-import { extractExercisesAnthropic } from "./extraction/anthropicProvider";
-import { extractExercisesOpenAI } from "./extraction/openaiProvider";
+import { generateExercisesFromPdfAnthropic } from "./extraction/anthropicProvider";
+import { generateExercisesFromPdfOpenAI } from "./extraction/openaiProvider";
 
 export type ExtractionProvider = "anthropic" | "openai";
 
@@ -11,15 +11,15 @@ function getProvider(): ExtractionProvider {
   return "anthropic";
 }
 
-export async function extractExercises(
+export async function generateExercisesFromPdf(
   pdfBase64: string,
   filename: string
 ): Promise<ExerciseSet> {
   const provider = getProvider();
 
   if (provider === "openai") {
-    return extractExercisesOpenAI(pdfBase64, filename);
+    return generateExercisesFromPdfOpenAI(pdfBase64, filename);
   }
 
-  return extractExercisesAnthropic(pdfBase64, filename);
+  return generateExercisesFromPdfAnthropic(pdfBase64, filename);
 }

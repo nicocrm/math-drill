@@ -2,7 +2,7 @@ import { mkdir, readFile, writeFile } from "fs/promises";
 import path from "path";
 import { NextResponse } from "next/server";
 import { v4 as uuidv4 } from "uuid";
-import { extractExercises } from "@/lib/extractExercises";
+import { generateExercisesFromPdf } from "@/lib/generateExercisesFromPdf";
 import { saveExercise } from "@/lib/exerciseStore";
 import {
   getJob,
@@ -26,7 +26,7 @@ async function runIngestJob(
     const pdfBuffer = await readFile(pdfPath);
     const pdfBase64 = pdfBuffer.toString("base64");
 
-    const exercise = await extractExercises(pdfBase64, filename);
+    const exercise = await generateExercisesFromPdf(pdfBase64, filename);
     updateProgress(jobId, "validating");
 
     exercise.id = exerciseId;
