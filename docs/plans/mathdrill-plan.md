@@ -374,9 +374,9 @@ self-review only. Accept this limitation for now.
 }
 ```
 
-Note: `openai` is added when implementing the [Anthropic → OpenAI Migration](./2025-03-09-anthropic-to-openai-migration.md). Either `@anthropic-ai/sdk` or `openai` is required depending on `EXTRACTION_PROVIDER`.
+Note: `openai` is added when implementing the [Anthropic → OpenAI Migration](./implemented/2025-03-09-anthropic-to-openai-migration.md). Either `@anthropic-ai/sdk` or `openai` is required depending on `EXTRACTION_PROVIDER`.
 
-No database. No auth. No external services beyond the LLM API (Anthropic or OpenAI). See [Anthropic → OpenAI Migration](./2025-03-09-anthropic-to-openai-migration.md) for provider-switching plan.
+No database. No auth. No external services beyond the LLM API (Anthropic or OpenAI). See [Anthropic → OpenAI Migration](./implemented/2025-03-09-anthropic-to-openai-migration.md) for provider-switching plan.
 
 ---
 
@@ -446,8 +446,8 @@ All review problems have been resolved in the plan. No outstanding fixes remain.
 |----------|---------|
 | [Initial Scaffolding](./implemented/initial-scaffolding-subplan.md) | Project structure, types, placeholder routes/components |
 | [E2E Testing](./implemented/e2e-testing-subplan.md) | Playwright-based end-to-end test framework and test suite |
-| [Remainder Implementation](./2025-03-09-mathdrill-remainder-implementation.md) | Phased plan: ingestion, math rendering/validation, exercise player, home/results, E2E |
-| [Anthropic → OpenAI Migration](./2025-03-09-anthropic-to-openai-migration.md) | Plan for switching PDF extraction from Anthropic to OpenAI API |
+| [Remainder Implementation](./implemented/2025-03-09-mathdrill-remainder-implementation.md) | Phased plan: ingestion, math rendering/validation, exercise player, home/results, E2E |
+| [Anthropic → OpenAI Migration](./implemented/2025-03-09-anthropic-to-openai-migration.md) | Plan for switching PDF extraction from Anthropic to OpenAI API |
 
 ---
 

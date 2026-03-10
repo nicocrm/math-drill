@@ -1,6 +1,6 @@
 # Sub-Plan: Initial Scaffolding
 
-> **Parent:** [mathdrill-plan.md](./mathdrill-plan.md)  
+> **Parent:** [mathdrill-plan.md](../mathdrill-plan.md)  
 > **Purpose:** Establish the minimal Next.js project structure, types, config, and placeholder routes/components so that feature work (ingestion, exercise player, etc.) can proceed without structural churn.
 
 ---

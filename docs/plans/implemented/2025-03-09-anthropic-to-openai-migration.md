@@ -1,6 +1,6 @@
 # Anthropic → OpenAI API Migration Plan
 
-**Parent**: [mathdrill-plan.md](./mathdrill-plan.md)  
+**Parent**: [mathdrill-plan.md](../mathdrill-plan.md)  
 **Date**: 2025-03-09  
 **Status**: Implemented
 
@@ -163,7 +163,7 @@ Docs mention “pass student input to Claude for semantic equivalence checking.�
 
 ## References
 
-- Main plan: [mathdrill-plan.md](./mathdrill-plan.md)
+- Main plan: [mathdrill-plan.md](../mathdrill-plan.md)
 - Remainder implementation: [2025-03-09-mathdrill-remainder-implementation.md](./2025-03-09-mathdrill-remainder-implementation.md)
 - Extraction entry: `src/lib/extractExercises.ts`
 - Ingest route: `src/app/api/ingest/route.ts`

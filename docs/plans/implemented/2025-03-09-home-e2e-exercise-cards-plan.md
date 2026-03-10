@@ -2,7 +2,7 @@
 
 **Parent**: [2025-03-09-mathdrill-remainder-implementation.md](./2025-03-09-mathdrill-remainder-implementation.md)  
 **Date**: 2025-03-09  
-**Status**: Draft
+**Status**: Implemented
 
 ## Overview
 

@@ -1,6 +1,6 @@
 # Sub-Plan: End-to-End Testing
 
-> **Parent:** [mathdrill-plan.md](./mathdrill-plan.md)  
+> **Parent:** [mathdrill-plan.md](../mathdrill-plan.md)  
 > **Purpose:** Establish an E2E testing framework and test suite that validates user flows across pages, API routes, and components. Tests are layered so that scaffolding-complete tests run immediately; feature-complete tests are added as each capability ships.
 
 ---

@@ -1,9 +1,9 @@
 # MathDrill Remainder Implementation Plan
 
-**Parent**: [mathdrill-plan.md](./mathdrill-plan.md)  
+**Parent**: [mathdrill-plan.md](../mathdrill-plan.md)  
 **Date**: 2025-03-09  
-**Status**: Draft  
-**Sub-plans completed**: [Initial Scaffolding](./implemented/initial-scaffolding-subplan.md), [E2E Testing](./implemented/e2e-testing-subplan.md)
+**Status**: Implemented  
+**Sub-plans completed**: [Initial Scaffolding](./initial-scaffolding-subplan.md), [E2E Testing](./e2e-testing-subplan.md)
 
 ## Overview
 
