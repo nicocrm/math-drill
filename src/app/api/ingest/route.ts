@@ -1,6 +1,7 @@
 import { mkdir, readFile, writeFile } from "fs/promises";
 import path from "path";
 import { NextResponse } from "next/server";
+import { auth } from "@clerk/nextjs/server";
 import { v4 as uuidv4 } from "uuid";
 import { generateExercisesFromPdf } from "@/lib/generateExercisesFromPdf";
 import { saveExercise } from "@/lib/exerciseStore";
@@ -19,7 +20,8 @@ async function runIngestJob(
   jobId: string,
   exerciseId: string,
   pdfPath: string,
-  filename: string
+  filename: string,
+  userId: string
 ): Promise<void> {
   try {
     updateProgress(jobId, "extracting");
@@ -32,6 +34,7 @@ async function runIngestJob(
     exercise.id = exerciseId;
     exercise.filename = filename;
     exercise.createdAt = new Date().toISOString();
+    exercise.createdBy = userId;
 
     updateProgress(jobId, "saving_exercise");
     await saveExercise(exercise);
@@ -59,6 +62,14 @@ async function runIngestJob(
 
 export async function POST(request: Request) {
   try {
+    const { userId } = await auth();
+    if (!userId) {
+      return NextResponse.json(
+        { error: "Authentication required" },
+        { status: 401 }
+      );
+    }
+
     const formData = await request.formData();
     const file = formData.get("file");
 
@@ -90,7 +101,7 @@ export async function POST(request: Request) {
     const buffer = Buffer.from(await file.arrayBuffer());
     await writeFile(pdfPath, buffer);
 
-    runIngestJob(jobId, exerciseId, pdfPath, filename).catch(() => {});
+    runIngestJob(jobId, exerciseId, pdfPath, filename, userId).catch(() => {});
 
     return NextResponse.json({ jobId });
   } catch (err) {

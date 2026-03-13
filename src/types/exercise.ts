@@ -31,6 +31,7 @@ export interface ExerciseSet {
   title: string;
   subject: string;
   createdAt: string;
+  createdBy?: string;
   sections: {
     id: string;
     label: string;
