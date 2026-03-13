@@ -1,8 +1,6 @@
-"use client";
-
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import Link from "next/link";
+import { useNavigate, Link } from "react-router";
+import { apiUrl } from "@/lib/api";
 
 interface IngestionStatusProps {
   jobId: string;
@@ -18,7 +16,7 @@ interface StatusData {
 }
 
 export function IngestionStatus({ jobId, onComplete }: IngestionStatusProps) {
-  const router = useRouter();
+  const navigate = useNavigate();
   const [status, setStatus] = useState<StatusData | null>(null);
 
   useEffect(() => {
@@ -27,14 +25,14 @@ export function IngestionStatus({ jobId, onComplete }: IngestionStatusProps) {
     const poll = async () => {
       try {
         const res = await fetch(
-          `/api/ingest/status?jobId=${encodeURIComponent(jobId)}`
+          apiUrl(`/api/ingest/status?jobId=${encodeURIComponent(jobId)}`)
         );
         if (!res.ok) return;
         const data = (await res.json()) as StatusData;
         setStatus(data);
         if (data.status === "done" && data.exerciseId) {
           onComplete?.();
-          router.push(`/session/${data.exerciseId}`);
+          navigate(`/session?id=${data.exerciseId}`);
           return true;
         }
         if (data.status === "error") {
@@ -54,7 +52,7 @@ export function IngestionStatus({ jobId, onComplete }: IngestionStatusProps) {
     poll();
 
     return () => clearInterval(interval);
-  }, [jobId, router, onComplete]);
+  }, [jobId, navigate, onComplete]);
 
   if (!status) {
     return (
@@ -83,7 +81,7 @@ export function IngestionStatus({ jobId, onComplete }: IngestionStatusProps) {
           </p>
         )}
         <Link
-          href={`/session/${status.exerciseId}`}
+          to={`/session?id=${status.exerciseId}`}
           className="underline hover:no-underline"
         >
           Start exercise →

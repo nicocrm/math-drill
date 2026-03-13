@@ -1,4 +1,3 @@
-"use client";
 
 import type { Question } from "@/types/exercise";
 

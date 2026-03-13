@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test";
-import mockExercise from "../fixtures/mock-exercise.json";
+import mockExercise from "../fixtures/mock-exercise.json" with { type: "json" };
 
 const mockSession = {
   id: "test-session-456",
@@ -49,7 +49,7 @@ test.describe("Results", () => {
   test("results page shows Session not found when no session", async ({
     page,
   }) => {
-    await page.goto("/results/nonexistent-session");
+    await page.goto("/results?id=nonexistent-session");
     await expect(
       page.getByRole("heading", { name: "Results" })
     ).toBeVisible();
@@ -69,7 +69,7 @@ test.describe("Results", () => {
       localStorage.setItem(`session-${session.id}`, JSON.stringify(session));
     }, mockSession);
 
-    await page.goto(`/results/${mockSession.id}`);
+    await page.goto(`/results?id=${mockSession.id}`);
     await expect(
       page.getByRole("heading", { name: "Results" })
     ).toBeVisible();

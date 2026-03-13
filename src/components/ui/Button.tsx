@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { Link } from "react-router";
 
 type ButtonBaseProps = {
   variant?: "primary" | "secondary" | "outline" | "ghost";
@@ -47,7 +47,7 @@ export function Button({
   const combined = `${base} ${variantStyles[variant]} ${sizeStyles[size]} ${className}`;
 
   if (href) {
-    return <Link href={href} className={combined} {...(props as React.AnchorHTMLAttributes<HTMLAnchorElement>)}>{children}</Link>;
+    return <Link to={href} className={combined} {...(props as React.AnchorHTMLAttributes<HTMLAnchorElement>)}>{children}</Link>;
   }
 
   return (

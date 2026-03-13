@@ -1,4 +1,3 @@
-"use client";
 
 import { PromptDisplay } from "@/components/PromptDisplay";
 import { MathDisplay } from "@/components/MathDisplay";
@@ -25,7 +24,7 @@ export function QuestionRenderer({
 }: QuestionRendererProps) {
   const value = answer?.value ?? (question.type === "multiple_choice" ? [] : "");
   const showFeedback = answer !== undefined && answer.isCorrect !== null;
-  const confirmed = answer !== undefined;
+  const _confirmed = answer !== undefined;
 
   const handleChange = (v: string | string[], workings?: string) => {
     onAnswerChange(v, workings);

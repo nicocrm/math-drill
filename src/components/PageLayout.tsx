@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { Link } from "react-router";
 import { AuthHeader } from "./AuthHeader";
 
 interface PageLayoutProps {
@@ -12,7 +12,7 @@ export function PageLayout({ children, title, subtitle }: PageLayoutProps) {
     <div className="min-h-screen p-6 sm:p-8">
       <header className="mb-8 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <Link
-          href="/"
+          to="/"
           className="text-xl font-bold tracking-tight text-foreground transition-colors duration-150 hover:text-primary focus-visible:text-primary"
         >
           MathDrill

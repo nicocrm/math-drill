@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { Link } from "react-router";
 
 interface AppLinkProps {
   href: string;
@@ -9,7 +9,7 @@ interface AppLinkProps {
 export function AppLink({ href, children, className = "" }: AppLinkProps) {
   return (
     <Link
-      href={href}
+      to={href}
       className={`text-primary underline-offset-4 transition-colors hover:text-primary-hover hover:underline focus-visible:underline ${className}`}
     >
       {children}

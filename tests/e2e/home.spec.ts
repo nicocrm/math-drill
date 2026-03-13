@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test";
-import mockExercise from "../fixtures/mock-exercise.json";
+import mockExercise from "../fixtures/mock-exercise.json" with { type: "json" };
 
 test.describe("Home", () => {
   test("shows MathDrill heading and empty state", async ({ page }) => {

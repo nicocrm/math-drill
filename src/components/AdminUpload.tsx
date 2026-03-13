@@ -1,27 +1,31 @@
-"use client";
-
 import { useState, useEffect, useCallback } from "react";
+import { useAuth } from "@clerk/react";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { DropZone } from "@/components/DropZone";
 import { IngestionStatus } from "@/components/IngestionStatus";
+import { apiUrl, authHeaders } from "@/lib/api";
 import type { ExerciseSet } from "@/types/exercise";
 
 export function AdminUpload() {
+  const { getToken } = useAuth();
   const [jobId, setJobId] = useState<string | null>(null);
   const [exercises, setExercises] = useState<ExerciseSet[]>([]);
   const [deleting, setDeleting] = useState<string | null>(null);
 
   const fetchExercises = useCallback(async () => {
     try {
-      const res = await fetch("/api/exercises?mine=1");
+      const token = await getToken();
+      const res = await fetch(apiUrl("/api/exercises?mine=1"), {
+        headers: authHeaders(token),
+      });
       if (!res.ok) return;
       const data = (await res.json()) as { exercises: ExerciseSet[] };
       setExercises(data.exercises ?? []);
     } catch {
       /* ignore */
     }
-  }, []);
+  }, [getToken]);
 
   useEffect(() => {
     fetchExercises();
@@ -31,7 +35,11 @@ export function AdminUpload() {
     if (!confirm("Delete this exercise?")) return;
     setDeleting(id);
     try {
-      const res = await fetch(`/api/exercises/${id}`, { method: "DELETE" });
+      const token = await getToken();
+      const res = await fetch(apiUrl(`/api/exercises/${id}`), {
+        method: "DELETE",
+        headers: authHeaders(token),
+      });
       if (res.ok) {
         setExercises((prev) => prev.filter((ex) => ex.id !== id));
       }

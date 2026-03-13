@@ -1,4 +1,3 @@
-"use client";
 
 import type { Question } from "@/types/exercise";
 
@@ -12,7 +11,7 @@ interface FractionInputProps {
 }
 
 export function FractionInput({
-  question,
+  question: _question,
   value,
   onChange,
   onConfirm,

@@ -1,6 +1,6 @@
 # MathDrill
 
-A Next.js web app that ingests math exercise sheets (PDF), generates fresh exercises via AI (Claude or GPT-4o), and presents them to students with interactive answer checking, KaTeX math rendering, and scoring.
+A Vite + React web app that ingests math exercise sheets (PDF), generates fresh exercises via AI (Claude or GPT-4o), and presents them to students with interactive answer checking, KaTeX math rendering, and scoring.
 
 ## Features
 
@@ -23,8 +23,8 @@ Multiple choice, true/false, numeric/fraction, expression, and open (ungraded).
 |-------|-------------|
 | `/` | Home — lists exercise sets with title, subject, question count, points |
 | `/admin` | Upload PDF, view/delete your exercises |
-| `/session/[exerciseId]` | Interactive drill — one question at a time with live score and progress |
-| `/results/[sessionId]` | Score breakdown by section, per-question review with correct answers and explanations |
+| `/session?id=...` | Interactive drill — one question at a time with live score and progress |
+| `/results?id=...` | Score breakdown by section, per-question review with correct answers and explanations |
 
 ## API Routes
 
@@ -38,7 +38,7 @@ Multiple choice, true/false, numeric/fraction, expression, and open (ungraded).
 
 ## Getting Started
 
-1. Copy `.env.example` to `.env.local` and configure your API key(s).
+1. Copy `.env.example` to `.env` and configure your API key(s).
 2. Install and run:
 
 ```bash
@@ -46,7 +46,7 @@ npm install
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000).
+This starts the Vite dev server (UI) and the API dev server. Open [http://localhost:3000](http://localhost:3000).
 
 ## Environment Variables
 
@@ -58,7 +58,7 @@ Open [http://localhost:3000](http://localhost:3000).
 | `VERIFY_EXPLANATIONS` | `true` | Set `false` to skip explanation fact-checking |
 | `EXERCISES_DIR` | `./exercises` | Path for saved exercise JSON files |
 | `INTAKE_DIR` | `./intake` | Path for uploaded PDFs |
-| `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` | — | Clerk publishable key (optional in dev — keyless mode works) |
+| `VITE_CLERK_PUBLISHABLE_KEY` | — | Clerk publishable key (optional in dev — keyless mode works) |
 | `CLERK_SECRET_KEY` | — | Clerk secret key (optional in dev) |
 
 ## Running Tests
@@ -111,7 +111,7 @@ terraform plan -var="clerk_secret_key=..." -var="openai_api_key=..."
 terraform apply
 ```
 
-After `apply`, Terraform outputs the function URLs and NATS endpoint. The Next.js frontend must be configured to call these URLs instead of local API routes.
+After `apply`, Terraform outputs the function URLs and NATS endpoint. The Vite frontend must be configured to call these URLs instead of local API routes (via `VITE_API_URL`).
 
 ### Terraform Outputs
 
@@ -139,7 +139,7 @@ Terraform references the zips via `zip_file` / `zip_hash`, so it redeploys autom
 
 ## Architecture Notes
 
-- **Monorepo** — `packages/core` contains shared types, storage interfaces, extraction logic, and job status management; `functions/` contains serverless handlers; the Next.js app remains the frontend
+- **Monorepo** — `packages/core` contains shared types, storage interfaces, extraction logic, and job status management; `functions/` contains serverless handlers; the Vite + React app is the frontend
 - **Adapter pattern** — `ExerciseStorage` and `FileStorage` interfaces with pluggable implementations: S3 for production, local filesystem for dev
 - **Async ingest pipeline** — `POST /api/ingest` saves the PDF and publishes a NATS message; the `ingest-worker` (NATS-triggered) handles extraction, validation, and saving; clients poll status via `GET /api/ingest/status`
 - **NATS KV for job status** — job progress is tracked in a NATS KV bucket (`ingest-jobs`) with TTL, replacing the previous in-memory store and enabling distributed access across function instances
@@ -149,4 +149,4 @@ Terraform references the zips via `zip_file` / `zip_hash`, so it redeploys autom
 
 ## Tech Stack
 
-Next.js 16 (App Router), React 19, TypeScript, Tailwind CSS, Clerk, KaTeX, mathjs, Zod, Playwright, Vitest, NATS, AWS S3 SDK, Terraform (Scaleway)
+Vite, React 19, React Router, TypeScript, Tailwind CSS, Clerk, KaTeX, mathjs, Zod, Playwright, Vitest, NATS, AWS S3 SDK, Terraform (Scaleway)

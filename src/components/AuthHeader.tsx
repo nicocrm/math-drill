@@ -1,4 +1,4 @@
-import { Show, SignInButton, UserButton } from "@clerk/nextjs";
+import { Show, SignInButton, UserButton } from "@clerk/react";
 
 export function AuthHeader() {
   return (

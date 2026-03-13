@@ -1,11 +1,10 @@
-"use client";
-
 import { useState, useEffect, useCallback } from "react";
-import { useRouter } from "next/navigation";
+import { useNavigate } from "react-router";
 import { v4 as uuidv4 } from "uuid";
 import { ScoreBoard } from "@/components/ScoreBoard";
 import { QuestionRenderer } from "@/components/QuestionRenderer";
 import { Button } from "@/components/ui/Button";
+import { apiUrl } from "@/lib/api";
 import {
   checkFraction,
   checkExpression,
@@ -24,7 +23,7 @@ interface ExercisePlayerProps {
 }
 
 export function ExercisePlayer({ exerciseId }: ExercisePlayerProps) {
-  const router = useRouter();
+  const navigate = useNavigate();
   const [exercise, setExercise] = useState<ExerciseSet | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -35,7 +34,7 @@ export function ExercisePlayer({ exerciseId }: ExercisePlayerProps) {
     let cancelled = false;
     async function fetchExercise() {
       try {
-        const res = await fetch(`/api/exercises/${exerciseId}`);
+        const res = await fetch(apiUrl(`/api/exercises/${exerciseId}`));
         if (!res.ok) {
           if (res.status === 404) {
             setError("Exercise not found");
@@ -174,11 +173,11 @@ export function ExercisePlayer({ exerciseId }: ExercisePlayerProps) {
         completedAt: new Date().toISOString(),
       };
       saveSession(completed);
-      router.push(`/results/${completed.id}`);
+      navigate(`/results?id=${completed.id}`);
     } else {
       setCurrentIndex((i) => i + 1);
     }
-  }, [session, exercise, hasConfirmed, isLastQuestion, router]);
+  }, [session, exercise, hasConfirmed, isLastQuestion, navigate]);
 
   if (loading) {
     return (

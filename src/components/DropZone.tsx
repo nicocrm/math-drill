@@ -1,14 +1,16 @@
-"use client";
 
 import { useCallback, useState } from "react";
+import { useAuth } from "@clerk/react";
 import { useDropzone } from "react-dropzone";
 import { Card } from "@/components/ui/Card";
+import { apiUrl, authHeaders } from "@/lib/api";
 
 interface DropZoneProps {
   onJobStarted?: (jobId: string) => void;
 }
 
 export function DropZone({ onJobStarted }: DropZoneProps) {
+  const { getToken } = useAuth();
   const [uploading, setUploading] = useState(false);
 
   const onDrop = useCallback(
@@ -17,10 +19,12 @@ export function DropZone({ onJobStarted }: DropZoneProps) {
       const file = acceptedFiles[0];
       setUploading(true);
       try {
+        const token = await getToken();
         const formData = new FormData();
         formData.append("file", file);
-        const res = await fetch("/api/ingest", {
+        const res = await fetch(apiUrl("/api/ingest"), {
           method: "POST",
+          headers: authHeaders(token),
           body: formData,
         });
         if (!res.ok) {
@@ -36,7 +40,7 @@ export function DropZone({ onJobStarted }: DropZoneProps) {
         setUploading(false);
       }
     },
-    [onJobStarted]
+    [onJobStarted, getToken]
   );
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({

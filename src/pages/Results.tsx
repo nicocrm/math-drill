@@ -1,24 +1,24 @@
-"use client";
-
 import { useState, useEffect } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useSearchParams, useNavigate } from "react-router";
 import { PageLayout } from "@/components/PageLayout";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { ScoreBoard } from "@/components/ScoreBoard";
 import { PromptDisplay } from "@/components/PromptDisplay";
 import { MathDisplay } from "@/components/MathDisplay";
+import { apiUrl } from "@/lib/api";
 import { getSession } from "@/lib/sessionStore";
 import type { Session, ExerciseSet, Question } from "@/types/exercise";
 
 export default function ResultsPage() {
-  const params = useParams();
-  const router = useRouter();
-  const sessionId = params.sessionId as string;
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const sessionId = searchParams.get("id");
   const [session, setSession] = useState<Session | null>(null);
   const [exercise, setExercise] = useState<ExerciseSet | null>(null);
 
   useEffect(() => {
+    if (!sessionId) return;
     const s = getSession(sessionId);
     queueMicrotask(() => setSession(s ?? null));
   }, [sessionId]);
@@ -29,7 +29,7 @@ export default function ResultsPage() {
     let cancelled = false;
     async function fetchExercise() {
       try {
-        const res = await fetch(`/api/exercises/${exerciseSetId}`);
+        const res = await fetch(apiUrl(`/api/exercises/${exerciseSetId}`));
         if (!res.ok || cancelled) return;
         const data = (await res.json()) as ExerciseSet;
         if (!cancelled) setExercise(data);
@@ -45,15 +45,15 @@ export default function ResultsPage() {
 
   const handleTryAgain = () => {
     if (session) {
-      router.push(`/session/${session.exerciseSetId}`);
+      navigate(`/session?id=${session.exerciseSetId}`);
     }
   };
 
   const handleBackToHome = () => {
-    router.push("/");
+    navigate("/");
   };
 
-  if (!session) {
+  if (!sessionId || !session) {
     return (
       <PageLayout title="Results" subtitle="Session not found">
         <Card>

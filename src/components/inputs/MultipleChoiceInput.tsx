@@ -1,4 +1,3 @@
-"use client";
 
 import { MathDisplay } from "@/components/MathDisplay";
 import type { Question } from "@/types/exercise";
@@ -20,7 +19,7 @@ export function MultipleChoiceInput({
   disabled = false,
 }: MultipleChoiceInputProps) {
   const choices = question.choices ?? [];
-  const correctIds = Array.isArray(question.answerMath)
+  const _correctIds = Array.isArray(question.answerMath)
     ? (question.answerMath as string[])
     : [];
 

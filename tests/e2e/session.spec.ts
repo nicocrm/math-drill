@@ -1,9 +1,9 @@
 import { test, expect } from "@playwright/test";
-import mockExercise from "../fixtures/mock-exercise.json";
+import mockExercise from "../fixtures/mock-exercise.json" with { type: "json" };
 
 test.describe("Session", () => {
   test("session page shows error when exercise not found", async ({ page }) => {
-    await page.goto("/session/test-exercise-123");
+    await page.goto("/session?id=test-exercise-123");
     await expect(
       page.getByRole("heading", { name: "Exercise session" })
     ).toBeVisible();
@@ -22,7 +22,7 @@ test.describe("Session", () => {
       await route.fulfill({ json: mockExercise });
     });
 
-    await page.goto("/session/mock-exercise-1");
+    await page.goto("/session?id=mock-exercise-1");
     await expect(
       page.getByRole("heading", { name: "Exercise session" })
     ).toBeVisible();
