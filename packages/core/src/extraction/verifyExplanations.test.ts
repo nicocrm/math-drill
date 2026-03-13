@@ -6,19 +6,23 @@ const mockOpenAICreate = vi.fn();
 const mockAnthropicCreate = vi.fn();
 
 vi.mock("openai", () => ({
-  default: vi.fn().mockImplementation(() => ({
-    responses: {
-      create: mockOpenAICreate,
-    },
-  })),
+  default: vi.fn().mockImplementation(function () {
+    return {
+      responses: {
+        create: mockOpenAICreate,
+      },
+    };
+  }),
 }));
 
 vi.mock("@anthropic-ai/sdk", () => ({
-  default: vi.fn().mockImplementation(() => ({
-    messages: {
-      create: mockAnthropicCreate,
-    },
-  })),
+  default: vi.fn().mockImplementation(function () {
+    return {
+      messages: {
+        create: mockAnthropicCreate,
+      },
+    };
+  }),
 }));
 
 const exerciseWithExplanation: ExerciseSet = {
