@@ -1,10 +1,13 @@
 import { getExerciseStorage } from "../lib/env";
 import type { ScalewayEvent, ScalewayResponse } from "../lib/scaleway";
-import { jsonResponse } from "../lib/scaleway";
+import { jsonResponse, handleCorsPreflightMaybe } from "../lib/scaleway";
 
 export async function handle(
   event: ScalewayEvent
 ): Promise<ScalewayResponse> {
+  const preflight = handleCorsPreflightMaybe(event);
+  if (preflight) return preflight;
+
   // Extract id from path: /exercises/{id} or /{id}
   const segments = event.path.replace(/^\/+|\/+$/g, "").split("/");
   const id = segments[segments.length - 1];

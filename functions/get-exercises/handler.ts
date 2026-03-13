@@ -1,11 +1,14 @@
 import { verifyAuth } from "@math-drill/core/auth";
 import { getExerciseStorage } from "../lib/env";
 import type { ScalewayEvent, ScalewayResponse } from "../lib/scaleway";
-import { jsonResponse } from "../lib/scaleway";
+import { jsonResponse, handleCorsPreflightMaybe } from "../lib/scaleway";
 
 export async function handle(
   event: ScalewayEvent
 ): Promise<ScalewayResponse> {
+  const preflight = handleCorsPreflightMaybe(event);
+  if (preflight) return preflight;
+
   const storage = getExerciseStorage();
   const mine = event.queryStringParameters?.mine;
 

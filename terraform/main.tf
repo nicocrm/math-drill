@@ -38,6 +38,15 @@ variable "openai_api_key" {
   sensitive = true
 }
 
+variable "clerk_publishable_key" {
+  description = "Clerk publishable key (VITE_CLERK_PUBLISHABLE_KEY for frontend build)"
+  default     = ""
+}
+
+variable "frontend_bucket" {
+  default = "math-drill-frontend"
+}
+
 # --- IAM ---
 
 resource "scaleway_iam_application" "functions" {
@@ -49,7 +58,7 @@ resource "scaleway_iam_policy" "s3_access" {
   application_id = scaleway_iam_application.functions.id
 
   rule {
-    project_ids     = [var.project_id]
+    project_ids          = [var.project_id]
     permission_set_names = ["ObjectStorageFullAccess"]
   }
 }
@@ -64,6 +73,24 @@ resource "scaleway_iam_api_key" "functions" {
 resource "scaleway_object_bucket" "exercises" {
   name   = var.s3_bucket
   region = var.region
+}
+
+resource "scaleway_object_bucket" "frontend" {
+  name   = var.frontend_bucket
+  region = var.region
+  acl    = "public-read"
+}
+
+resource "scaleway_object_bucket_website_configuration" "frontend" {
+  bucket = scaleway_object_bucket.frontend.name
+  region = var.region
+
+  index_document {
+    suffix = "index.html"
+  }
+  error_document {
+    key = "index.html"
+  }
 }
 
 # --- NATS ---
@@ -85,11 +112,12 @@ resource "scaleway_function_namespace" "main" {
   name = "math-drill"
 
   environment_variables = {
-    STORAGE            = "s3"
-    S3_BUCKET          = scaleway_object_bucket.exercises.name
-    S3_ENDPOINT        = "https://s3.${var.region}.scw.cloud"
-    S3_REGION          = var.region
-    NATS_URL           = scaleway_mnq_nats_account.main.endpoint
+    STORAGE        = "s3"
+    S3_BUCKET      = scaleway_object_bucket.exercises.name
+    S3_ENDPOINT    = "https://s3.${var.region}.scw.cloud"
+    S3_REGION      = var.region
+    NATS_URL       = scaleway_mnq_nats_account.main.endpoint
+    ALLOWED_ORIGIN = scaleway_object_bucket_website_configuration.frontend.website_endpoint
   }
 
   secret_environment_variables = {
@@ -176,7 +204,7 @@ resource "scaleway_function" "ingest_worker" {
   handler      = "handler.handle"
   privacy      = "private"
   memory_limit = 1024
-  timeout      = 300  # 5 minutes for AI extraction
+  timeout      = 300 # 5 minutes for AI extraction
   zip_file     = "${path.module}/../dist/functions/ingest-worker.zip"
   zip_hash     = filesha256("${path.module}/../dist/functions/ingest-worker.zip")
   deploy       = true
@@ -222,4 +250,17 @@ output "nats_endpoint" {
 
 output "s3_bucket" {
   value = scaleway_object_bucket.exercises.name
+}
+
+output "frontend_url" {
+  description = "Frontend URL (S3 website endpoint)"
+  value       = scaleway_object_bucket_website_configuration.frontend.website_endpoint
+}
+
+output "frontend_bucket" {
+  value = scaleway_object_bucket.frontend.name
+}
+
+output "clerk_publishable_key" {
+  value = var.clerk_publishable_key
 }

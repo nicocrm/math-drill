@@ -3,11 +3,14 @@ import { connect, credsAuthenticator } from "nats";
 import { verifyAuth, requireAuth, HttpError } from "@math-drill/core/auth";
 import { getFileStorage, getJobStatusStore } from "../lib/env";
 import type { ScalewayEvent, ScalewayResponse } from "../lib/scaleway";
-import { jsonResponse } from "../lib/scaleway";
+import { jsonResponse, handleCorsPreflightMaybe } from "../lib/scaleway";
 
 export async function handle(
   event: ScalewayEvent
 ): Promise<ScalewayResponse> {
+  const preflight = handleCorsPreflightMaybe(event);
+  if (preflight) return preflight;
+
   const authHeader = event.headers?.authorization ?? event.headers?.Authorization;
   const req = new Request("http://localhost", {
     headers: authHeader ? { Authorization: authHeader } : {},
