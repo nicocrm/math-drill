@@ -13,6 +13,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:e2e": "playwright test",
+    "test:integration": "NATS_URL=${NATS_URL:-nats://localhost:4222} vitest run --config vitest.integration.config.ts",
     "dev:api": "npx tsx --watch functions/dev-server.ts",
     "dev:worker": "npx tsx --watch functions/dev-worker.ts"
   },

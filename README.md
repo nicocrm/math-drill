@@ -64,8 +64,9 @@ Open [http://localhost:3000](http://localhost:3000).
 ## Running Tests
 
 ```bash
-npm run test:e2e    # Playwright E2E tests (Chromium, port 3002)
 npm run test        # Vitest unit tests
+npm run test:e2e    # Playwright E2E tests (Chromium, port 3002)
+npm run test:integration   # NATS integration tests (requires: docker compose up -d nats)
 ```
 
 First-time Playwright setup:
