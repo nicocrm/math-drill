@@ -6,6 +6,7 @@ import Link from "next/link";
 
 interface IngestionStatusProps {
   jobId: string;
+  onComplete?: () => void;
 }
 
 interface StatusData {
@@ -16,7 +17,7 @@ interface StatusData {
   error?: string;
 }
 
-export function IngestionStatus({ jobId }: IngestionStatusProps) {
+export function IngestionStatus({ jobId, onComplete }: IngestionStatusProps) {
   const router = useRouter();
   const [status, setStatus] = useState<StatusData | null>(null);
 
@@ -32,6 +33,7 @@ export function IngestionStatus({ jobId }: IngestionStatusProps) {
         const data = (await res.json()) as StatusData;
         setStatus(data);
         if (data.status === "done" && data.exerciseId) {
+          onComplete?.();
           router.push(`/session/${data.exerciseId}`);
           return true;
         }
@@ -52,7 +54,7 @@ export function IngestionStatus({ jobId }: IngestionStatusProps) {
     poll();
 
     return () => clearInterval(interval);
-  }, [jobId, router]);
+  }, [jobId, router, onComplete]);
 
   if (!status) {
     return (

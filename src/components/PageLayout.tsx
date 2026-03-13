@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { AuthHeader } from "./AuthHeader";
 
 interface PageLayoutProps {
   children: React.ReactNode;
@@ -16,6 +17,7 @@ export function PageLayout({ children, title, subtitle }: PageLayoutProps) {
         >
           MathDrill
         </Link>
+        <AuthHeader />
       </header>
       <main className="mx-auto flex max-w-2xl flex-col gap-6">
         <div>

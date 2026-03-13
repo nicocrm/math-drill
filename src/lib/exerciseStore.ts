@@ -1,4 +1,4 @@
-import { mkdir, readdir, readFile, writeFile } from "fs/promises";
+import { mkdir, readdir, readFile, unlink, writeFile } from "fs/promises";
 import path from "path";
 import type { ExerciseSet } from "@/types/exercise";
 
@@ -45,4 +45,22 @@ export async function saveExercise(exercise: ExerciseSet): Promise<void> {
   const dir = await ensureExercisesDir();
   const filePath = path.join(dir, `${exercise.id}.json`);
   await writeFile(filePath, JSON.stringify(exercise, null, 2), "utf-8");
+}
+
+export async function deleteExercise(id: string): Promise<boolean> {
+  const dir = await ensureExercisesDir();
+  const filePath = path.join(dir, `${id}.json`);
+  try {
+    await unlink(filePath);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+export async function listExercisesByUser(
+  userId: string
+): Promise<ExerciseSet[]> {
+  const all = await listExercises();
+  return all.filter((ex) => ex.createdBy === userId);
 }
