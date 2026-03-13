@@ -134,7 +134,7 @@ Create Scaleway-compatible serverless functions for the API routes.
 
 ## Phase 3: Ingest Worker (NATS-triggered)
 
-- [ ] `functions/ingest-worker/` — triggered by NATS message on `ingest.jobs` subject
+- [x] `functions/ingest-worker/` — triggered by NATS message on `ingest.jobs` subject
   - NATS message payload includes `{ jobId, s3Key, userId }`
   - Download PDF from S3
   - Call AI extraction (reuse `generateExercisesFromPdf`)
@@ -142,8 +142,8 @@ Create Scaleway-compatible serverless functions for the API routes.
   - Save exercise JSON to S3 under `exercises/{userId}/{id}.json`, set `createdBy: userId`
   - Update NATS KV with progress at each step (`extracting` → `validating` → `saving` → `done`)
   - On error, update KV with error status
-- [ ] Configure NATS trigger on the function in Scaleway
-- [ ] Set function timeout to 5 minutes (Scaleway allows 10s–60min, so plenty of headroom for AI extraction)
+- [x] Configure NATS trigger on the function in Scaleway
+- [x] Set function timeout to 5 minutes (Scaleway allows 10s–60min, so plenty of headroom for AI extraction)
 
 **Verify:** Upload a PDF via POST /ingest, poll status, confirm exercise appears in GET /exercises.
 

@@ -75,13 +75,69 @@ First-time Playwright setup:
 npx playwright install chromium
 ```
 
+## Deployment (Terraform)
+
+The backend API and ingest pipeline can be deployed to **Scaleway** using Terraform. The configuration provisions:
+
+- **Object Storage (S3-compatible)** — bucket for exercise JSON files and uploaded PDFs
+- **NATS** — message queue for ingest jobs; triggers the ingest worker when a job is enqueued
+- **Serverless Functions** — HTTP endpoints for exercises CRUD, ingest, and ingest status; plus a private NATS-triggered ingest worker
+
+### Prerequisites
+
+- [Terraform](https://www.terraform.io/downloads) (1.0+)
+- [Scaleway account](https://www.scaleway.com/) and [API credentials](https://www.scaleway.com/en/docs/iam/api-keys/)
+- Scaleway CLI (`scw`) — optional, for deploying function code
+
+### Terraform Variables
+
+| Variable | Required | Default | Description |
+|----------|----------|---------|-------------|
+| `clerk_secret_key` | Yes | — | Clerk secret key for JWT verification |
+| `anthropic_api_key` | Yes | — | Anthropic API key for AI extraction |
+| `openai_api_key` | No | `""` | OpenAI API key (if using OpenAI provider) |
+| `region` | No | `fr-par` | Scaleway region |
+| `s3_bucket` | No | `math-drill-exercises` | Object Storage bucket name |
+
+Provide variables via `terraform.tfvars`, `-var` flags, or environment variables (`TF_VAR_*`).
+
+### Deploy Infrastructure
+
+```bash
+cd terraform
+terraform init
+terraform plan -var="clerk_secret_key=..." -var="anthropic_api_key=..."
+terraform apply
+```
+
+After `apply`, Terraform outputs the function URLs and NATS endpoint. The Next.js frontend must be configured to call these URLs instead of local API routes.
+
+### Terraform Outputs
+
+| Output | Description |
+|--------|-------------|
+| `get_exercises_url` | URL for listing exercises |
+| `get_exercise_url` | URL for fetching a single exercise |
+| `delete_exercise_url` | URL for deleting an exercise |
+| `post_ingest_url` | URL for uploading PDFs and starting ingest |
+| `get_ingest_status_url` | URL for polling ingest job status |
+| `nats_endpoint` | NATS server endpoint (for worker connectivity) |
+| `s3_bucket` | Object Storage bucket name |
+
+### Function Code Deployment
+
+The Terraform configuration creates the function resources (namespace, functions, NATS trigger). Function code is deployed separately, typically via the Scaleway CLI (`scw function deploy`) or a CI pipeline. Each function in `functions/` (e.g. `get-exercises`, `post-ingest`, `ingest-worker`) must be packaged and deployed to its corresponding Scaleway function.
+
 ## Architecture Notes
 
+- **Monorepo** — `packages/core` contains shared types, storage interfaces, extraction logic, and job status management; `functions/` contains serverless handlers; the Next.js app remains the frontend
+- **Adapter pattern** — `ExerciseStorage` and `FileStorage` interfaces with pluggable implementations: S3 for production, local filesystem for dev
+- **Async ingest pipeline** — `POST /api/ingest` saves the PDF and publishes a NATS message; the `ingest-worker` (NATS-triggered) handles extraction, validation, and saving; clients poll status via `GET /api/ingest/status`
+- **NATS KV for job status** — job progress is tracked in a NATS KV bucket (`ingest-jobs`) with TTL, replacing the previous in-memory store and enabling distributed access across function instances
 - **Sessions are client-side only** — stored in `localStorage`, no server persistence
-- **Ingest jobs are in-memory** — lost on server restart, not suited for multi-process/serverless as-is
 - **Auth is API-level** — no middleware route protection; `/admin` page is accessible without login but upload will 401
 - **AI generates original questions** — the system prompt instructs the AI to create fresh exercises inspired by the PDF, not extract verbatim content
 
 ## Tech Stack
 
-Next.js 16 (App Router), React 19, TypeScript, Tailwind CSS, Clerk, KaTeX, mathjs, Zod, Playwright, Vitest
+Next.js 16 (App Router), React 19, TypeScript, Tailwind CSS, Clerk, KaTeX, mathjs, Zod, Playwright, Vitest, NATS, AWS S3 SDK, Terraform (Scaleway)

@@ -125,6 +125,28 @@ resource "scaleway_function" "get_ingest_status" {
   timeout      = 30
 }
 
+resource "scaleway_function" "ingest_worker" {
+  namespace_id = scaleway_function_namespace.main.id
+  name         = "ingest-worker"
+  runtime      = "node22"
+  handler      = "handler.handle"
+  privacy      = "private"
+  memory_limit = 1024
+  timeout      = 300  # 5 minutes for AI extraction
+}
+
+# --- NATS Trigger ---
+
+resource "scaleway_function_trigger" "ingest_trigger" {
+  function_id = scaleway_function.ingest_worker.id
+  name        = "ingest-jobs-trigger"
+
+  nats {
+    account_id = scaleway_mnq_nats_account.main.id
+    subject    = "ingest.jobs"
+  }
+}
+
 # --- Outputs ---
 
 output "get_exercises_url" {
