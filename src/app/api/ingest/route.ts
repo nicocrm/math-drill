@@ -6,7 +6,6 @@ import { v4 as uuidv4 } from "uuid";
 import { generateExercisesFromPdf } from "@/lib/generateExercisesFromPdf";
 import { saveExercise } from "@/lib/exerciseStore";
 import {
-  getJob,
   setJob,
   updateProgress,
 } from "@/lib/ingestJobs";
@@ -24,22 +23,22 @@ async function runIngestJob(
   userId: string
 ): Promise<void> {
   try {
-    updateProgress(jobId, "extracting");
+    await updateProgress(jobId, "extracting");
     const pdfBuffer = await readFile(pdfPath);
     const pdfBase64 = pdfBuffer.toString("base64");
 
     const exercise = await generateExercisesFromPdf(pdfBase64, filename);
-    updateProgress(jobId, "validating");
+    await updateProgress(jobId, "validating");
 
     exercise.id = exerciseId;
     exercise.filename = filename;
     exercise.createdAt = new Date().toISOString();
     exercise.createdBy = userId;
 
-    updateProgress(jobId, "saving_exercise");
+    await updateProgress(jobId, "saving_exercise");
     await saveExercise(exercise);
 
-    updateProgress(jobId, "done", {
+    await updateProgress(jobId, "done", {
       exerciseId,
       status: "done",
       questionCount: exercise.questions.length,
@@ -52,7 +51,7 @@ async function runIngestJob(
       error,
       stack: err instanceof Error ? err.stack : undefined,
     });
-    setJob(jobId, {
+    await setJob(jobId, {
       status: "error",
       error,
       progress: 0,
@@ -93,10 +92,10 @@ export async function POST(request: Request) {
     const safeName = filename.replace(/[^a-zA-Z0-9.-]/g, "_");
     const pdfPath = path.join(INTAKE_DIR, `${jobId}-${safeName}`);
 
-    setJob(jobId, { status: "pending", progress: 0 });
+    await setJob(jobId, { status: "pending", progress: 0 });
 
     await mkdir(INTAKE_DIR, { recursive: true });
-    updateProgress(jobId, "saving");
+    await updateProgress(jobId, "saving");
 
     const buffer = Buffer.from(await file.arrayBuffer());
     await writeFile(pdfPath, buffer);

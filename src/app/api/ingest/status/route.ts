@@ -29,7 +29,7 @@ export async function GET(request: NextRequest) {
         };
 
         const poll = async () => {
-          const job = getJob(jobId);
+          const job = await getJob(jobId);
           if (!job) {
             send({ step: "saving", progress: 0, error: "Job not found" });
             controller.close();
@@ -81,7 +81,7 @@ export async function GET(request: NextRequest) {
     });
   }
 
-  const job = getJob(jobId);
+  const job = await getJob(jobId);
   if (!job) {
     return NextResponse.json(
       { status: "pending", progress: 0, error: "Job not found" },

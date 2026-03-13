@@ -1,55 +1,22 @@
-export type JobStatus =
-  | "pending"
-  | "processing"
-  | "done"
-  | "error";
+import { MemoryJobStatusStore } from "@math-drill/core/jobStatus/memoryJobStatusStore";
+import type { JobState, IngestStep } from "@math-drill/core";
 
-export type IngestStep =
-  | "saving"
-  | "extracting"
-  | "validating"
-  | "saving_exercise"
-  | "done";
+export type { JobStatus, IngestStep, JobState } from "@math-drill/core";
 
-export interface JobState {
-  status: JobStatus;
-  progress?: number;
-  step?: IngestStep;
-  exerciseId?: string;
-  questionCount?: number;
-  error?: string;
+const store = new MemoryJobStatusStore();
+
+export function getJob(id: string): Promise<JobState | undefined> {
+  return store.get(id);
 }
 
-const jobs = new Map<string, JobState>();
-
-const STEP_PROGRESS: Record<IngestStep, number> = {
-  saving: 10,
-  extracting: 40,
-  validating: 70,
-  saving_exercise: 90,
-  done: 100,
-};
-
-export function getJob(id: string): JobState | undefined {
-  return jobs.get(id);
-}
-
-export function setJob(id: string, state: JobState): void {
-  jobs.set(id, state);
+export function setJob(id: string, state: JobState): Promise<void> {
+  return store.set(id, state);
 }
 
 export function updateProgress(
   id: string,
   step: IngestStep,
   extra?: Partial<JobState>
-): void {
-  const current = jobs.get(id) ?? { status: "processing" as const };
-  const progress = STEP_PROGRESS[step];
-  jobs.set(id, {
-    ...current,
-    status: step === "done" ? "done" : "processing",
-    step,
-    progress,
-    ...extra,
-  });
+): Promise<void> {
+  return store.updateProgress(id, step, extra);
 }

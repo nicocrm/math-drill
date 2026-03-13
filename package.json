@@ -2,6 +2,9 @@
   "name": "math-drill",
   "version": "0.1.0",
   "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -12,6 +15,7 @@
     "test:e2e": "playwright test"
   },
   "dependencies": {
+    "@math-drill/core": "*",
     "@anthropic-ai/sdk": "^0.78.0",
     "@clerk/nextjs": "^7.0.4",
     "katex": "^0.16.37",
