@@ -87,15 +87,15 @@ The backend API and ingest pipeline can be deployed to **Scaleway** using Terraf
 
 - [Terraform](https://www.terraform.io/downloads) (1.0+)
 - [Scaleway account](https://www.scaleway.com/) and [API credentials](https://www.scaleway.com/en/docs/iam/api-keys/)
-- Scaleway CLI (`scw`) — optional, for deploying function code
+- GNU Make and `zip` (for building function bundles)
 
 ### Terraform Variables
 
 | Variable | Required | Default | Description |
 |----------|----------|---------|-------------|
 | `clerk_secret_key` | Yes | — | Clerk secret key for JWT verification |
-| `anthropic_api_key` | Yes | — | Anthropic API key for AI extraction |
-| `openai_api_key` | No | `""` | OpenAI API key (if using OpenAI provider) |
+| `anthropic_api_key` | No | `""` | Anthropic API key (if using Anthropic provider) |
+| `openai_api_key` | Yes | — | OpenAI API key for AI extraction |
 | `region` | No | `fr-par` | Scaleway region |
 | `s3_bucket` | No | `math-drill-exercises` | Object Storage bucket name |
 
@@ -104,9 +104,10 @@ Provide variables via `terraform.tfvars`, `-var` flags, or environment variables
 ### Deploy Infrastructure
 
 ```bash
+make                # build function zips
 cd terraform
 terraform init
-terraform plan -var="clerk_secret_key=..." -var="anthropic_api_key=..."
+terraform plan -var="clerk_secret_key=..." -var="openai_api_key=..."
 terraform apply
 ```
 
@@ -126,7 +127,15 @@ After `apply`, Terraform outputs the function URLs and NATS endpoint. The Next.j
 
 ### Function Code Deployment
 
-The Terraform configuration creates the function resources (namespace, functions, NATS trigger). Function code is deployed separately, typically via the Scaleway CLI (`scw function deploy`) or a CI pipeline. Each function in `functions/` (e.g. `get-exercises`, `post-ingest`, `ingest-worker`) must be packaged and deployed to its corresponding Scaleway function.
+Function code is bundled and deployed via Terraform. Build the zips first, then apply:
+
+```bash
+make            # bundles each function with esbuild, produces dist/functions/*.zip
+cd terraform
+terraform apply
+```
+
+Terraform references the zips via `zip_file` / `zip_hash`, so it redeploys automatically when code changes. `make clean` removes the build artifacts.
 
 ## Architecture Notes
 

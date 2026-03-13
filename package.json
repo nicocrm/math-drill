@@ -15,7 +15,8 @@
     "test:e2e": "playwright test",
     "test:integration": "NATS_URL=${NATS_URL:-nats://localhost:4222} vitest run --config vitest.integration.config.ts",
     "dev:api": "npx tsx --watch functions/dev-server.ts",
-    "dev:worker": "npx tsx --watch functions/dev-worker.ts"
+    "dev:worker": "npx tsx --watch functions/dev-worker.ts",
+    "smoke:functions": "bash scripts/smoke-test-functions.sh"
   },
   "dependencies": {
     "@math-drill/core": "*",

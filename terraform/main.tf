@@ -8,8 +8,13 @@ terraform {
 }
 
 provider "scaleway" {
-  region = var.region
-  zone   = "${var.region}-1"
+  project_id = var.project_id
+  region     = var.region
+  zone       = "${var.region}-1"
+}
+
+variable "project_id" {
+  description = "Scaleway project ID"
 }
 
 variable "region" {
@@ -26,11 +31,32 @@ variable "clerk_secret_key" {
 
 variable "anthropic_api_key" {
   sensitive = true
+  default   = ""
 }
 
 variable "openai_api_key" {
-  sensitive   = true
-  default     = ""
+  sensitive = true
+}
+
+# --- IAM ---
+
+resource "scaleway_iam_application" "functions" {
+  name = "math-drill-functions"
+}
+
+resource "scaleway_iam_policy" "s3_access" {
+  name           = "math-drill-s3-access"
+  application_id = scaleway_iam_application.functions.id
+
+  rule {
+    project_ids     = [var.project_id]
+    permission_set_names = ["ObjectStorageFullAccess"]
+  }
+}
+
+resource "scaleway_iam_api_key" "functions" {
+  application_id = scaleway_iam_application.functions.id
+  expires_at     = "2027-01-01T00:00:00Z"
 }
 
 # --- Object Storage ---
@@ -67,9 +93,12 @@ resource "scaleway_function_namespace" "main" {
   }
 
   secret_environment_variables = {
-    CLERK_SECRET_KEY   = var.clerk_secret_key
-    ANTHROPIC_API_KEY  = var.anthropic_api_key
-    OPENAI_API_KEY     = var.openai_api_key
+    CLERK_SECRET_KEY      = var.clerk_secret_key
+    ANTHROPIC_API_KEY     = var.anthropic_api_key
+    OPENAI_API_KEY        = var.openai_api_key
+    AWS_ACCESS_KEY_ID     = scaleway_iam_api_key.functions.access_key
+    AWS_SECRET_ACCESS_KEY = scaleway_iam_api_key.functions.secret_key
+    NATS_CREDS            = scaleway_mnq_nats_credentials.functions.file
   }
 }
 
@@ -83,6 +112,9 @@ resource "scaleway_function" "get_exercises" {
   privacy      = "public"
   memory_limit = 256
   timeout      = 30
+  zip_file     = "${path.module}/../dist/functions/get-exercises.zip"
+  zip_hash     = filesha256("${path.module}/../dist/functions/get-exercises.zip")
+  deploy       = true
 }
 
 resource "scaleway_function" "get_exercise" {
@@ -93,6 +125,9 @@ resource "scaleway_function" "get_exercise" {
   privacy      = "public"
   memory_limit = 256
   timeout      = 30
+  zip_file     = "${path.module}/../dist/functions/get-exercise.zip"
+  zip_hash     = filesha256("${path.module}/../dist/functions/get-exercise.zip")
+  deploy       = true
 }
 
 resource "scaleway_function" "delete_exercise" {
@@ -103,6 +138,9 @@ resource "scaleway_function" "delete_exercise" {
   privacy      = "public"
   memory_limit = 256
   timeout      = 30
+  zip_file     = "${path.module}/../dist/functions/delete-exercise.zip"
+  zip_hash     = filesha256("${path.module}/../dist/functions/delete-exercise.zip")
+  deploy       = true
 }
 
 resource "scaleway_function" "post_ingest" {
@@ -113,6 +151,9 @@ resource "scaleway_function" "post_ingest" {
   privacy      = "public"
   memory_limit = 512
   timeout      = 60
+  zip_file     = "${path.module}/../dist/functions/post-ingest.zip"
+  zip_hash     = filesha256("${path.module}/../dist/functions/post-ingest.zip")
+  deploy       = true
 }
 
 resource "scaleway_function" "get_ingest_status" {
@@ -123,6 +164,9 @@ resource "scaleway_function" "get_ingest_status" {
   privacy      = "public"
   memory_limit = 256
   timeout      = 30
+  zip_file     = "${path.module}/../dist/functions/get-ingest-status.zip"
+  zip_hash     = filesha256("${path.module}/../dist/functions/get-ingest-status.zip")
+  deploy       = true
 }
 
 resource "scaleway_function" "ingest_worker" {
@@ -133,6 +177,9 @@ resource "scaleway_function" "ingest_worker" {
   privacy      = "private"
   memory_limit = 1024
   timeout      = 300  # 5 minutes for AI extraction
+  zip_file     = "${path.module}/../dist/functions/ingest-worker.zip"
+  zip_hash     = filesha256("${path.module}/../dist/functions/ingest-worker.zip")
+  deploy       = true
 }
 
 # --- NATS Trigger ---

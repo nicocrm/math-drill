@@ -12,7 +12,12 @@ export async function handle(
   }
 
   const jobStore = getJobStatusStore();
-  const job = await jobStore.get(jobId);
+  let job;
+  try {
+    job = await jobStore.get(jobId);
+  } catch (err) {
+    return jsonResponse(503, { error: "Job status service unavailable" });
+  }
 
   if (!job) {
     return jsonResponse(404, {

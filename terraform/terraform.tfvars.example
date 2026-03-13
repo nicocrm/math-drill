@@ -1,0 +1,6 @@
+project_id        = "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"  # from Scaleway console
+region            = "fr-par"
+s3_bucket         = "math-drill-exercises"
+clerk_secret_key  = "sk_live_..."   # from Clerk dashboard
+anthropic_api_key = ""              # optional, if using Anthropic provider
+openai_api_key    = "sk-..."       # required, from OpenAI

@@ -1,5 +1,5 @@
 import { v4 as uuidv4 } from "uuid";
-import { connect } from "nats";
+import { connect, credsAuthenticator } from "nats";
 import { verifyAuth, requireAuth, HttpError } from "@math-drill/core/auth";
 import { getFileStorage, getJobStatusStore } from "../lib/env";
 import type { ScalewayEvent, ScalewayResponse } from "../lib/scaleway";
@@ -60,7 +60,10 @@ export async function handle(
 
     // Publish NATS message to trigger ingest worker
     if (process.env.NATS_URL) {
-      const nc = await connect({ servers: process.env.NATS_URL });
+      const natsOpts = process.env.NATS_CREDS
+        ? { authenticator: credsAuthenticator(new TextEncoder().encode(process.env.NATS_CREDS)) }
+        : {};
+      const nc = await connect({ servers: process.env.NATS_URL, ...natsOpts });
       const payload = JSON.stringify({
         jobId,
         exerciseId,

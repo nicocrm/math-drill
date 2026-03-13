@@ -18,6 +18,7 @@ node_modules
 
 # production
 /build
+/dist
 
 # misc
 .DS_Store
@@ -30,6 +31,9 @@ yarn-error.log*
 
 # local env files
 .env*.local
+
+# terraform secrets (copy terraform.tfvars.example to terraform.tfvars)
+terraform/terraform.tfvars
 
 # vercel
 .vercel

@@ -48,6 +48,7 @@ export function getJobStatusStore(): JobStatusStore {
   if (process.env.NATS_URL) {
     jobStatusStore = new NatsJobStatusStore({
       servers: process.env.NATS_URL,
+      creds: process.env.NATS_CREDS,
     });
   } else {
     jobStatusStore = new MemoryJobStatusStore();

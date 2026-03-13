@@ -1,9 +1,10 @@
-import { connect, type NatsConnection, type KV } from "nats";
+import { connect, credsAuthenticator, type NatsConnection, type KV } from "nats";
 import type { JobState, IngestStep, JobStatusStore } from "../jobStatus";
 import { STEP_PROGRESS } from "../jobStatus";
 
 export interface NatsJobStatusStoreOptions {
   servers: string;
+  creds?: string;
   kvBucket?: string;
   ttlSeconds?: number;
 }
@@ -23,7 +24,10 @@ export class NatsJobStatusStore implements JobStatusStore {
 
   private async ensureKV(): Promise<KV> {
     if (this.kv) return this.kv;
-    this.nc = await connect({ servers: this.opts.servers });
+    const auth = this.opts.creds
+      ? { authenticator: credsAuthenticator(new TextEncoder().encode(this.opts.creds)) }
+      : {};
+    this.nc = await connect({ servers: this.opts.servers, ...auth });
     const js = this.nc.jetstream();
     this.kv = await js.views.kv(this.kvBucket, { ttl: this.ttlMs });
     return this.kv;
