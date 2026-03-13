@@ -104,7 +104,7 @@ Decouple server-side logic from Next.js API routes into a standalone package.
     download(key: string): Promise<Buffer>
   }
   ```
-- [ ] Implement S3 adapter for Scaleway Object Storage (S3-compatible API) *(deferred to Phase 2)*
+- [x] Implement S3 adapter for Scaleway Object Storage (S3-compatible API)
   - S3 key strategy: `exercises/{userId}/{id}.json` for efficient per-user listing
 - [x] Create `packages/core/jobStatus.ts` — abstract job status interface
   ```typescript
@@ -113,7 +113,7 @@ Decouple server-side logic from Next.js API routes into a standalone package.
     set(jobId: string, status: JobStatus, ttlSeconds?: number): Promise<void>
   }
   ```
-- [ ] Implement NATS KV adapter for job status *(deferred to Phase 2)*
+- [x] Implement NATS KV adapter for job status
 - [x] Existing unit tests should pass against the extracted package
 
 **Verify:** `npm test` in `packages/core/` passes.
@@ -122,13 +122,13 @@ Decouple server-side logic from Next.js API routes into a standalone package.
 
 Create Scaleway-compatible serverless functions for the API routes.
 
-- [ ] `functions/get-exercises/` — list exercise sets from S3; if `?mine=1`, call `verifyAuth()` and filter by `userId`
-- [ ] `functions/get-exercise/` — fetch single exercise set from S3
-- [ ] `functions/delete-exercise/` — `requireAuth()`, verify `createdBy` matches `userId` (403 otherwise), delete from S3
-- [ ] `functions/post-ingest/` — `requireAuth()`, accept PDF upload, store in S3, publish NATS message with `userId` in payload, return jobId
-- [ ] `functions/get-ingest-status/` — read job status from NATS KV, return JSON
-- [ ] Configure Terraform for deployment
-- [ ] Set up environment variables (API keys, NATS credentials, S3 bucket, `CLERK_SECRET_KEY`)
+- [x] `functions/get-exercises/` — list exercise sets from S3; if `?mine=1`, call `verifyAuth()` and filter by `userId`
+- [x] `functions/get-exercise/` — fetch single exercise set from S3
+- [x] `functions/delete-exercise/` — `requireAuth()`, verify `createdBy` matches `userId` (403 otherwise), delete from S3
+- [x] `functions/post-ingest/` — `requireAuth()`, accept PDF upload, store in S3, publish NATS message with `userId` in payload, return jobId
+- [x] `functions/get-ingest-status/` — read job status from NATS KV, return JSON
+- [x] Configure Terraform for deployment
+- [x] Set up environment variables (API keys, NATS credentials, S3 bucket, `CLERK_SECRET_KEY`)
 
 **Verify:** Deploy and test each HTTP endpoint with curl.
 

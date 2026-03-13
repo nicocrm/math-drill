@@ -1,0 +1,6 @@
+services:
+  nats:
+    image: nats:latest
+    command: -js  # enables JetStream / KV
+    ports:
+      - "4222:4222"
