@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { DropZone } from "@/components/DropZone";
 import { IngestionStatus } from "@/components/IngestionStatus";
-import { apiUrl, authHeaders } from "@/lib/api";
+import { getExercisesUrl, deleteExerciseUrl, authHeaders } from "@/lib/api";
 import type { ExerciseSet } from "@/types/exercise";
 
 export function AdminUpload() {
@@ -16,7 +16,7 @@ export function AdminUpload() {
   const fetchExercises = useCallback(async () => {
     try {
       const token = await getToken();
-      const res = await fetch(apiUrl("/api/exercises?mine=1"), {
+      const res = await fetch(getExercisesUrl(true), {
         headers: authHeaders(token),
       });
       if (!res.ok) return;
@@ -36,7 +36,7 @@ export function AdminUpload() {
     setDeleting(id);
     try {
       const token = await getToken();
-      const res = await fetch(apiUrl(`/api/exercises/${id}`), {
+      const res = await fetch(deleteExerciseUrl(id), {
         method: "DELETE",
         headers: authHeaders(token),
       });

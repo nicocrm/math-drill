@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { PageLayout } from "@/components/PageLayout";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
-import { apiUrl } from "@/lib/api";
+import { getExercisesUrl } from "@/lib/api";
 import type { ExerciseSet } from "@/types/exercise";
 
 export default function Home() {
@@ -12,7 +12,7 @@ export default function Home() {
   useEffect(() => {
     async function fetchExercises() {
       try {
-        const res = await fetch(apiUrl("/api/exercises"));
+        const res = await fetch(getExercisesUrl());
         if (!res.ok) return;
         const data = (await res.json()) as { exercises: ExerciseSet[] };
         setExercises(data.exercises ?? []);

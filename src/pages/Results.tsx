@@ -6,7 +6,7 @@ import { Card } from "@/components/ui/Card";
 import { ScoreBoard } from "@/components/ScoreBoard";
 import { PromptDisplay } from "@/components/PromptDisplay";
 import { MathDisplay } from "@/components/MathDisplay";
-import { apiUrl } from "@/lib/api";
+import { getExerciseUrl } from "@/lib/api";
 import { getSession } from "@/lib/sessionStore";
 import type { Session, ExerciseSet, Question } from "@/types/exercise";
 
@@ -29,7 +29,7 @@ export default function ResultsPage() {
     let cancelled = false;
     async function fetchExercise() {
       try {
-        const res = await fetch(apiUrl(`/api/exercises/${exerciseSetId}`));
+        const res = await fetch(getExerciseUrl(exerciseSetId));
         if (!res.ok || cancelled) return;
         const data = (await res.json()) as ExerciseSet;
         if (!cancelled) setExercise(data);

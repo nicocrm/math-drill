@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router";
-import { apiUrl } from "@/lib/api";
+import { getIngestStatusUrl } from "@/lib/api";
 
 interface IngestionStatusProps {
   jobId: string;
@@ -25,7 +25,7 @@ export function IngestionStatus({ jobId, onComplete }: IngestionStatusProps) {
     const poll = async () => {
       try {
         const res = await fetch(
-          apiUrl(`/api/ingest/status?jobId=${encodeURIComponent(jobId)}`)
+          getIngestStatusUrl(jobId)
         );
         if (!res.ok) return;
         const data = (await res.json()) as StatusData;

@@ -4,7 +4,7 @@ import { v4 as uuidv4 } from "uuid";
 import { ScoreBoard } from "@/components/ScoreBoard";
 import { QuestionRenderer } from "@/components/QuestionRenderer";
 import { Button } from "@/components/ui/Button";
-import { apiUrl } from "@/lib/api";
+import { getExerciseUrl } from "@/lib/api";
 import {
   checkFraction,
   checkExpression,
@@ -34,7 +34,7 @@ export function ExercisePlayer({ exerciseId }: ExercisePlayerProps) {
     let cancelled = false;
     async function fetchExercise() {
       try {
-        const res = await fetch(apiUrl(`/api/exercises/${exerciseId}`));
+        const res = await fetch(getExerciseUrl(exerciseId));
         if (!res.ok) {
           if (res.status === 404) {
             setError("Exercise not found");

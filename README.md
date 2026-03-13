@@ -60,6 +60,12 @@ This starts the Vite dev server (UI) and the API dev server. Open [http://localh
 | `INTAKE_DIR` | `./intake` | Path for uploaded PDFs |
 | `VITE_CLERK_PUBLISHABLE_KEY` | — | Clerk publishable key (optional in dev — keyless mode works) |
 | `CLERK_SECRET_KEY` | — | Clerk secret key (optional in dev) |
+| `VITE_API_URL` | — | API base URL for unified mode (local dev, static build preview) |
+| `VITE_GET_EXERCISES_URL` | — | List exercises (production — Scaleway function URL) |
+| `VITE_GET_EXERCISE_URL` | — | Get single exercise (production) |
+| `VITE_DELETE_EXERCISE_URL` | — | Delete exercise (production) |
+| `VITE_POST_INGEST_URL` | — | Upload PDF / start ingest (production) |
+| `VITE_GET_INGEST_STATUS_URL` | — | Poll ingest job status (production) |
 
 ## Running Tests
 
@@ -74,6 +80,36 @@ First-time Playwright setup:
 ```bash
 npx playwright install chromium
 ```
+
+## Testing the Static Build Locally
+
+To serve the production build locally (e.g. to verify deployment artifacts):
+
+```bash
+npm run build
+npm run preview
+```
+
+This serves the built files from `dist/` at [http://localhost:4173](http://localhost:4173).
+
+**With API:** The static build needs `VITE_API_URL` to reach the backend. Without it, API calls use relative paths that `vite preview` does not proxy, so they will 404. To test with the local API:
+
+1. Build with the API URL:
+   ```bash
+   VITE_API_URL=http://localhost:3001 npm run build
+   ```
+
+2. In one terminal, start the API server:
+   ```bash
+   npm run dev:api
+   ```
+
+3. In another terminal, serve the static build:
+   ```bash
+   npm run preview
+   ```
+
+Open [http://localhost:4173](http://localhost:4173); the frontend will call the API at http://localhost:3001.
 
 ## Deployment (Terraform)
 
@@ -111,7 +147,13 @@ terraform plan -var="clerk_secret_key=..." -var="openai_api_key=..."
 terraform apply
 ```
 
-After `apply`, Terraform outputs the function URLs and NATS endpoint. The Vite frontend must be configured to call these URLs instead of local API routes (via `VITE_API_URL`).
+After `apply`, Terraform outputs the function URLs and NATS endpoint. For production, build the frontend with the five endpoint-specific env vars set from Terraform outputs:
+
+```bash
+make build-frontend
+```
+
+This runs `terraform -chdir=terraform output -raw` for each URL and passes them to `npm run build`.
 
 ### Terraform Outputs
 
