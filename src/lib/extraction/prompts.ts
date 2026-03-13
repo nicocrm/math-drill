@@ -38,7 +38,7 @@ Rules:
 - For choice.latex, use pure LaTeX only (no $ delimiters), e.g. \\\\left(\\\\frac{2}{3}\\\\right)^2.
 - answerMath: For numeric/expression use mathjs-evaluable string (e.g. "2/3", "(1/2)^3").
 - answerMath: For multiple_choice use string[] of correct choice ids.
-- answerMath: For true_false use "true" or "false".
+- answerMath: For true_false use EXACTLY the lowercase strings "true" or "false" (never "vrai", "faux", "True", "False", "yes", "no", etc.).
 - answerMath: For type "open" use null (ungraded).
 - answerLatex: KaTeX string for displaying the correct answer.
 - explanation: A brief, factual explanation of the mathematical concept being tested. Use only well-established mathematical facts. Do NOT invent examples, numbers, or derivations not present in the question. Ground the explanation in the concept itself (e.g., fraction simplification, order of operations), not in the specific numbers of this question. Keep it 1–3 sentences.
@@ -51,21 +51,40 @@ export function validateAnswerMath(question: {
 }): void {
   if (question.type === "open") {
     if (question.answerMath !== null) {
-      throw new Error(`Question ${question.id}: open type must have answerMath: null`);
+      throw new Error(
+        `Question ${question.id}: open type must have answerMath: null, got: ${JSON.stringify(question.answerMath)}`
+      );
     }
     return;
   }
   if (question.type === "multiple_choice") {
     const arr = question.answerMath;
     if (!Array.isArray(arr)) {
-      throw new Error(`Question ${question.id}: multiple_choice must have answerMath as string[]`);
+      throw new Error(
+        `Question ${question.id}: multiple_choice must have answerMath as string[], got: ${JSON.stringify(question.answerMath)}`
+      );
     }
     return;
   }
   if (question.type === "true_false") {
-    const s = question.answerMath;
-    if (s !== "true" && s !== "false") {
-      throw new Error(`Question ${question.id}: true_false must have answerMath "true" or "false"`);
+    const raw = question.answerMath;
+    const s =
+      typeof raw === "string"
+        ? raw.trim().toLowerCase()
+        : raw;
+    const normalized =
+      s === "vrai" || s === "yes" || s === "1" || s === "oui"
+        ? "true"
+        : s === "faux" || s === "no" || s === "0" || s === "non"
+          ? "false"
+          : s;
+    if (normalized !== "true" && normalized !== "false") {
+      throw new Error(
+        `Question ${question.id}: true_false must have answerMath "true" or "false", got: ${JSON.stringify(raw)}`
+      );
+    }
+    if (raw !== normalized) {
+      (question as { answerMath: string }).answerMath = normalized;
     }
     return;
   }
@@ -98,7 +117,20 @@ export function parseAndValidateExerciseSet(raw: string): ExerciseSet {
   const result = exerciseSetSchema.parse(parsed) as ExerciseSet;
 
   for (const q of result.questions) {
-    validateAnswerMath(q);
+    try {
+      validateAnswerMath(q);
+    } catch (err) {
+      console.error("[extraction] validation failed for question", q.id, {
+        type: q.type,
+        answerMath: q.answerMath,
+        rawQuestions: result.questions.map((r) => ({
+          id: r.id,
+          type: r.type,
+          answerMath: r.answerMath,
+        })),
+      });
+      throw err;
+    }
   }
 
   return result;

@@ -43,6 +43,12 @@ async function runIngestJob(
     });
   } catch (err) {
     const error = err instanceof Error ? err.message : String(err);
+    console.error("[ingest] job failed", {
+      jobId,
+      filename,
+      error,
+      stack: err instanceof Error ? err.stack : undefined,
+    });
     setJob(jobId, {
       status: "error",
       error,

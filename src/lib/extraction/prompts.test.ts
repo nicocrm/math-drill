@@ -17,7 +17,7 @@ describe("validateAnswerMath", () => {
   it("throws for open type with non-null answerMath", () => {
     expect(() =>
       validateAnswerMath({ id: "q1", type: "open", answerMath: "x" })
-    ).toThrow("open type must have answerMath: null");
+    ).toThrow('open type must have answerMath: null, got: "x"');
   });
 
   it("accepts string[] answerMath for multiple_choice", () => {
@@ -29,7 +29,7 @@ describe("validateAnswerMath", () => {
   it("throws for multiple_choice with string answerMath", () => {
     expect(() =>
       validateAnswerMath({ id: "q1", type: "multiple_choice", answerMath: "a" })
-    ).toThrow("multiple_choice must have answerMath as string[]");
+    ).toThrow('multiple_choice must have answerMath as string[], got: "a"');
   });
 
   it("accepts true/false for true_false type", () => {
@@ -41,10 +41,21 @@ describe("validateAnswerMath", () => {
     ).not.toThrow();
   });
 
+  it("accepts vrai/faux and normalizes to true/false", () => {
+    const qVrai = { id: "q1", type: "true_false" as const, answerMath: "vrai" };
+    const qFaux = { id: "q2", type: "true_false" as const, answerMath: "faux" };
+    expect(() => validateAnswerMath(qVrai)).not.toThrow();
+    expect(() => validateAnswerMath(qFaux)).not.toThrow();
+    expect(qVrai.answerMath).toBe("true");
+    expect(qFaux.answerMath).toBe("false");
+  });
+
   it("throws for true_false with invalid answerMath", () => {
     expect(() =>
-      validateAnswerMath({ id: "q1", type: "true_false", answerMath: "yes" })
-    ).toThrow('true_false must have answerMath "true" or "false"');
+      validateAnswerMath({ id: "q1", type: "true_false", answerMath: "invalid" })
+    ).toThrow(
+      'Question q1: true_false must have answerMath "true" or "false", got: "invalid"'
+    );
   });
 
   it("accepts valid mathjs string for numeric type", () => {
