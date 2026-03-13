@@ -1,91 +1,86 @@
 # MathDrill
 
-A locally-hosted Next.js web app that ingests math exercise sheets (PDF), extracts exercises via Claude AI, stores them as JSON, and presents them to a single student with interactive answer checking, math rendering, and scoring.
+A Next.js web app that ingests math exercise sheets (PDF), generates fresh exercises via AI (Claude or GPT-4o), and presents them to students with interactive answer checking, KaTeX math rendering, and scoring.
 
-## Project Goal
+## Features
 
-- **Ingest** PDF exercise sheets via an admin upload page
-- **Extract** questions using Claude AI (multiple choice, true/false, numeric/fraction, expression, open)
-- **Store** extracted exercises as JSON in `./exercises/`
-- **Present** exercises one at a time with KaTeX math rendering
-- **Validate** answers using mathjs (fractions, expressions)
-- **Score** sessions with per-section breakdown and results review
+- **PDF ingestion** — Upload a PDF exercise sheet; AI generates new questions inspired by it (not verbatim copies)
+- **AI providers** — Anthropic Claude (`claude-sonnet-4-20250514`) or OpenAI (`gpt-4o`)
+- **Concept explanations** — AI generates per-question explanations, fact-checked via a second AI call to remove hallucinations
+- **Math rendering** — KaTeX for inline and block math in prompts, choices, and answers
+- **Answer validation** — Client-side checking via mathjs (fractions, expressions, multiple choice, true/false)
+- **Scoring** — Live score during session, per-section breakdown and full question review on results page
+- **Authentication** — Clerk (sign-in modal, per-user exercise ownership, API-level auth on uploads/deletes)
+- **Storage** — Flat-file JSON on disk (no database)
 
-No database, no auth, no multi-user. Single local process.
+## Question Types
 
-## Current Status
+Multiple choice, true/false, numeric/fraction, expression, and open (ungraded).
 
-### Implemented
+## Pages
 
-| Area | Status |
-|------|--------|
-| **Project structure** | Next.js 14 App Router, TypeScript, `src/` layout |
-| **Types** | Full `ExerciseSet`, `Question`, `Session`, etc. in `types/exercise.ts` |
-| **Pages** | `/` (home), `/admin` (upload), `/session/[exerciseId]`, `/results/[sessionId]` |
-| **API routes** | `/api/exercises`, `/api/exercises/[id]`, `/api/ingest`, `/api/ingest/status` |
-| **Components** | DropZone, IngestionStatus, ExercisePlayer, QuestionRenderer, MathDisplay, PromptDisplay, ScoreBoard, input components |
-| **Lib modules** | `generateExercisesFromPdf.ts`, `extraction/*`, `mathValidation.ts`, `exerciseStore.ts`, `sessionStore.ts` |
-| **Dependencies** | @anthropic-ai/sdk, openai, katex, mathjs, react-dropzone, uuid, zod |
-| **E2E tests** | Playwright; navigation, home, admin, session, results, API smoke |
+| Route | Description |
+|-------|-------------|
+| `/` | Home — lists exercise sets with title, subject, question count, points |
+| `/admin` | Upload PDF, view/delete your exercises |
+| `/session/[exerciseId]` | Interactive drill — one question at a time with live score and progress |
+| `/results/[sessionId]` | Score breakdown by section, per-question review with correct answers and explanations |
 
-### Not Yet Implemented (Stubs / Placeholders)
+## API Routes
 
-| Area | Current behavior |
-|------|------------------|
-| **Ingestion** | POST `/api/ingest` returns mock `jobId`; no PDF handling or Claude extraction |
-| **Exercise storage** | `exerciseStore` returns `[]` and `null`; no file I/O |
-| **Exercise listing** | Home page shows "No exercise sets yet"; API returns empty array |
-| **Exercise player** | Session page shows stub; no question rendering or answer flow |
-| **Math rendering** | `MathDisplay` / `PromptDisplay` render plain text; KaTeX not wired |
-| **Validation** | `checkFraction` / `checkExpression` return `false`; mathjs not used |
-| **Results** | Results page shows stub; no score calculation or review |
+| Endpoint | Auth | Description |
+|----------|------|-------------|
+| `GET /api/exercises` | No | List all exercises (`?mine=1` requires auth) |
+| `GET /api/exercises/[id]` | No | Get single exercise |
+| `DELETE /api/exercises/[id]` | Yes | Delete exercise (owner only) |
+| `POST /api/ingest` | Yes | Upload PDF, starts async extraction job |
+| `GET /api/ingest/status?jobId=...` | No | Poll job progress (JSON or SSE) |
 
 ## Getting Started
 
-1. Copy `.env.example` to `.env.local` and add your API key(s). Use `ANTHROPIC_API_KEY` for Anthropic (default) or `OPENAI_API_KEY` with `EXTRACTION_PROVIDER=openai` for OpenAI.
-2. Install dependencies and run the dev server:
+1. Copy `.env.example` to `.env.local` and configure your API key(s).
+2. Install and run:
 
 ```bash
 npm install
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000). Navigate between Home (`/`) and Upload (`/admin`).
+Open [http://localhost:3000](http://localhost:3000).
+
+## Environment Variables
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `EXTRACTION_PROVIDER` | `anthropic` | `anthropic` or `openai` |
+| `ANTHROPIC_API_KEY` | — | Required when provider is `anthropic` |
+| `OPENAI_API_KEY` | — | Required when provider is `openai` |
+| `VERIFY_EXPLANATIONS` | `true` | Set `false` to skip explanation fact-checking |
+| `EXERCISES_DIR` | `./exercises` | Path for saved exercise JSON files |
+| `INTAKE_DIR` | `./intake` | Path for uploaded PDFs |
+| `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` | — | Clerk publishable key (optional in dev — keyless mode works) |
+| `CLERK_SECRET_KEY` | — | Clerk secret key (optional in dev) |
 
 ## Running Tests
 
-End-to-end tests use [Playwright](https://playwright.dev/). Run them with:
-
 ```bash
-npm run test:e2e
+npm run test:e2e    # Playwright E2E tests (Chromium, port 3002)
+npm run test        # Vitest unit tests
 ```
 
-This command starts the dev server on port 3002 (to avoid conflicts with a running dev instance), runs the E2E test suite in Chromium, and shuts down when complete.
-
-**First-time setup:** Playwright installs Chromium automatically. If you need to install browsers manually:
+First-time Playwright setup:
 
 ```bash
 npx playwright install chromium
 ```
 
-**View test report:** After a run, open the HTML report with:
+## Architecture Notes
 
-```bash
-npx playwright show-report
-```
+- **Sessions are client-side only** — stored in `localStorage`, no server persistence
+- **Ingest jobs are in-memory** — lost on server restart, not suited for multi-process/serverless as-is
+- **Auth is API-level** — no middleware route protection; `/admin` page is accessible without login but upload will 401
+- **AI generates original questions** — the system prompt instructs the AI to create fresh exercises inspired by the PDF, not extract verbatim content
 
-## Environment Variables
+## Tech Stack
 
-| Variable | Description |
-|----------|-------------|
-| `EXTRACTION_PROVIDER` | `anthropic` (default) or `openai` |
-| `ANTHROPIC_API_KEY` | Required when using Anthropic (Claude API) |
-| `OPENAI_API_KEY` | Required when using OpenAI |
-| `EXERCISES_DIR` | Path to JSON storage (default: `./exercises`) |
-| `INTAKE_DIR` | Path for uploaded PDFs (default: `./intake`) |
-
-## Documentation
-
-- [MathDrill Plan](docs/plans/mathdrill-plan.md) — Full build plan, data model, ingestion flow
-- [Initial Scaffolding](docs/plans/initial-scaffolding-subplan.md) — Scaffolding scope and completion criteria
-- [E2E Testing](docs/plans/e2e-testing-subplan.md) — Playwright test framework
+Next.js 16 (App Router), React 19, TypeScript, Tailwind CSS, Clerk, KaTeX, mathjs, Zod, Playwright, Vitest
