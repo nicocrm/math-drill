@@ -22,6 +22,8 @@ export function IngestionStatus({ jobId, onComplete }: IngestionStatusProps) {
   useEffect(() => {
     if (!jobId) return;
 
+    setStatus(null);
+
     const poll = async () => {
       try {
         const res = await fetch(
