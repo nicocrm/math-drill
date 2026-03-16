@@ -19,6 +19,8 @@ export async function handleIngest(payload: IngestPayload): Promise<void> {
   const fileStorage = getFileStorage();
   const exerciseStorage = getExerciseStorage();
 
+  console.log(`[ingest-worker] Starting job ${jobId}: file=${filename}, s3Key=${s3Key}`);
+
   try {
     await jobStore.updateProgress(jobId, "extracting");
     const pdfBuffer = await fileStorage.download(s3Key);

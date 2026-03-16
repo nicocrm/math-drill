@@ -78,6 +78,11 @@ resource "scaleway_object_bucket" "exercises" {
 resource "scaleway_object_bucket" "frontend" {
   name   = var.frontend_bucket
   region = var.region
+}
+
+resource "scaleway_object_bucket_acl" "frontend" {
+  bucket = scaleway_object_bucket.frontend.name
+  region = var.region
   acl    = "public-read"
 }
 
@@ -117,7 +122,7 @@ resource "scaleway_function_namespace" "main" {
     S3_ENDPOINT    = "https://s3.${var.region}.scw.cloud"
     S3_REGION      = var.region
     NATS_URL       = scaleway_mnq_nats_account.main.endpoint
-    ALLOWED_ORIGIN = scaleway_object_bucket_website_configuration.frontend.website_endpoint
+    ALLOWED_ORIGIN = "https://${scaleway_object_bucket_website_configuration.frontend.website_endpoint}"
   }
 
   secret_environment_variables = {

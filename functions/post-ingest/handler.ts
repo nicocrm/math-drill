@@ -63,6 +63,7 @@ export async function handle(
 
     // Publish NATS message to trigger ingest worker
     if (process.env.NATS_URL) {
+      console.log(`[post-ingest] Connecting to NATS at ${process.env.NATS_URL}...`);
       const natsOpts = process.env.NATS_CREDS
         ? { authenticator: credsAuthenticator(new TextEncoder().encode(process.env.NATS_CREDS)) }
         : {};
@@ -77,6 +78,9 @@ export async function handle(
       nc.publish("ingest.jobs", new TextEncoder().encode(payload));
       await nc.flush();
       await nc.close();
+      console.log(`[post-ingest] Published to ingest.jobs: jobId=${jobId}`);
+    } else {
+      console.warn("[post-ingest] NATS_URL not set — skipping publish");
     }
 
     return jsonResponse(200, { jobId });

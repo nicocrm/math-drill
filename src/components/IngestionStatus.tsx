@@ -47,7 +47,7 @@ export function IngestionStatus({ jobId, onComplete }: IngestionStatusProps) {
     const interval = setInterval(async () => {
       const done = await poll();
       if (done) clearInterval(interval);
-    }, 1000);
+    }, 15000);
 
     poll();
 
