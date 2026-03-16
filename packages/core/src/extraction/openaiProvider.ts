@@ -17,6 +17,7 @@ export async function generateExercisesFromPdfOpenAI(
     model: OPENAI_MODEL,
     max_output_tokens: 8192,
     instructions: SYSTEM_PROMPT,
+    text: { format: { type: "json_object" } },
     input: [
       {
         role: "user",

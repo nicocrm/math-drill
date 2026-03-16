@@ -19,6 +19,8 @@ export async function verifyAuth(req: Request): Promise<AuthResult> {
   if (!token) return { userId: null };
   const result = await verifyToken(token, {
     secretKey: process.env.CLERK_SECRET_KEY!,
+    // jwtKey enables networkless verification; required when JWKS fetch fails (e.g. local dev)
+    jwtKey: process.env.CLERK_JWT_KEY,
   });
   if ("errors" in result) return { userId: null };
   return { userId: result.sub };

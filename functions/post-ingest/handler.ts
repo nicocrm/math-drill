@@ -36,15 +36,30 @@ async function triggerIngestWorker(payload: {
     );
     console.log(`[post-ingest] Sent to SQS: jobId=${payload.jobId}`);
   } else if (workerUrl) {
-    const resp = await fetch(workerUrl, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    });
-    if (!resp.ok) {
-      throw new Error(`Worker returned ${resp.status}: ${await resp.text()}`);
+    console.log(`[post-ingest] Fetching worker at ${workerUrl} for jobId=${payload.jobId}`);
+    try {
+      const resp = await fetch(workerUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      if (!resp.ok) {
+        const text = await resp.text();
+        console.error(`[post-ingest] Worker returned ${resp.status}: ${text}`);
+        throw new Error(`Worker returned ${resp.status}: ${text}`);
+      }
+      console.log(`[post-ingest] Triggered worker via HTTP: jobId=${payload.jobId}`);
+    } catch (err) {
+      const e = err instanceof Error ? err : new Error(String(err));
+      console.error("[post-ingest] Fetch to worker failed:", {
+        url: workerUrl,
+        jobId: payload.jobId,
+        message: e.message,
+        cause: e.cause,
+        stack: e.stack,
+      });
+      throw err;
     }
-    console.log(`[post-ingest] Triggered worker via HTTP: jobId=${payload.jobId}`);
   } else {
     console.warn("[post-ingest] SQS_QUEUE_URL and INGEST_WORKER_URL not set — ingest worker will not run");
   }

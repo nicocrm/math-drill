@@ -68,6 +68,7 @@ The dev server is configured with `INGEST_WORKER_URL=http://localhost:3002` so p
 | `INTAKE_DIR` | `./intake` | Path for uploaded PDFs |
 | `VITE_CLERK_PUBLISHABLE_KEY` | — | Clerk publishable key (optional in dev — keyless mode works) |
 | `CLERK_SECRET_KEY` | — | Clerk secret key (optional in dev) |
+| `CLERK_JWT_KEY` | — | JWT public key for networkless verification (required for local dev with auth — get from Dashboard → API Keys → Show JWT public key) |
 | `VITE_API_URL` | — | API base URL for unified mode (local dev, static build preview) |
 | `VITE_GET_EXERCISES_URL` | — | List exercises (production — Scaleway function URL) |
 | `VITE_GET_EXERCISE_URL` | — | Get single exercise (production) |

@@ -1,3 +1,4 @@
+import "dotenv/config";
 import { createServer, type IncomingMessage, type ServerResponse } from "http";
 import { handleIngest, type IngestPayload } from "./ingest-worker/handler";
 
@@ -15,17 +16,23 @@ const server = createServer(async (req: IncomingMessage, res: ServerResponse) =>
     body += chunk.toString();
   }
 
+  let payload: IngestPayload;
   try {
-    const payload = JSON.parse(body) as IngestPayload;
-    console.log(`[worker] Received job: ${payload.jobId} (${payload.filename})`);
-    await handleIngest(payload);
-    res.writeHead(200, { "Content-Type": "application/json" });
-    res.end(JSON.stringify({ ok: true }));
+    payload = JSON.parse(body) as IngestPayload;
   } catch (err) {
-    console.error("[worker] Error:", err);
-    res.writeHead(500, { "Content-Type": "application/json" });
-    res.end(JSON.stringify({ error: err instanceof Error ? err.message : String(err) }));
+    console.error("[worker] Invalid JSON:", err);
+    res.writeHead(400, { "Content-Type": "application/json" });
+    res.end(JSON.stringify({ error: "Invalid JSON" }));
+    return;
   }
+
+  console.log(`[worker] Accepted job ${payload.jobId} (${payload.filename}), processing in background`);
+  res.writeHead(200, { "Content-Type": "application/json" });
+  res.end(JSON.stringify({ ok: true }));
+
+  void handleIngest(payload).catch((err) => {
+    console.error("[worker] Error:", err);
+  });
 });
 
 server.listen(PORT, () => {

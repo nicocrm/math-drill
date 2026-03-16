@@ -87,6 +87,23 @@ const FIXTURE_DIR = join(
   "../../../../tests/fixtures"
 );
 
+describe("parseAndValidateExerciseSet - LaTeX escaping", () => {
+  it("fixes invalid JSON escapes from LLM (single backslash in \\sqrt, \\frac)", () => {
+    // LLMs output \sqrt, \frac etc.; JSON only allows \" \\ \/ \b \f \n \r \t \uXXXX
+    // \s, \l, \a etc. cause "Bad escaped character" - we sanitize by doubling them
+    const raw = `{"id":"ex-1","filename":"t.pdf","title":"T","subject":"m","createdAt":"2025-01-01T00:00:00Z","sections":[{"id":"s1","label":"S","maxPoints":1}],"questions":[{"id":"q1","type":"numeric","section":"s1","points":1,"prompt":"What is $\\sqrt{2}$?","answerMath":"sqrt(2)","answerLatex":"\\sqrt{2}","requiresSteps":false,"requiresExample":false}]}`;
+    const result = parseAndValidateExerciseSet(raw);
+    expect(result.questions[0].prompt).toBe("What is $\\sqrt{2}$?");
+    expect(result.questions[0].answerLatex).toBe("\\sqrt{2}");
+  });
+
+  it("leaves valid JSON escapes unchanged (\\n, \\t)", () => {
+    const raw = `{"id":"ex-1","filename":"t.pdf","title":"T","subject":"m","createdAt":"2025-01-01T00:00:00Z","sections":[{"id":"s1","label":"S","maxPoints":1}],"questions":[{"id":"q1","type":"numeric","section":"s1","points":1,"prompt":"Line1\\nLine2","answerMath":"1","answerLatex":"1","requiresSteps":false,"requiresExample":false}]}`;
+    const result = parseAndValidateExerciseSet(raw);
+    expect(result.questions[0].prompt).toBe("Line1\nLine2");
+  });
+});
+
 describe("parseAndValidateExerciseSet - explanation", () => {
   it("accepts exercise with explanations", () => {
     const raw = readFileSync(

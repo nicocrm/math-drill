@@ -18,18 +18,28 @@ interface StatusData {
 export function IngestionStatus({ jobId, onComplete }: IngestionStatusProps) {
   const navigate = useNavigate();
   const [status, setStatus] = useState<StatusData | null>(null);
+  const [pollError, setPollError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!jobId) return;
 
     setStatus(null);
+    setPollError(null);
 
     const poll = async () => {
       try {
-        const res = await fetch(
-          getIngestStatusUrl(jobId)
-        );
-        if (!res.ok) return;
+        const res = await fetch(getIngestStatusUrl(jobId));
+        if (!res.ok) {
+          let msg = `Status check failed (${res.status})`;
+          try {
+            const body = (await res.json()) as { error?: string };
+            if (body.error) msg = body.error;
+          } catch {
+            /* use default */
+          }
+          setPollError(msg);
+          return true;
+        }
         const data = (await res.json()) as StatusData;
         setStatus(data);
         if (data.status === "done" && data.exerciseId) {
@@ -40,8 +50,10 @@ export function IngestionStatus({ jobId, onComplete }: IngestionStatusProps) {
         if (data.status === "error") {
           return true;
         }
-      } catch {
-        // Ignore
+      } catch (e) {
+        const msg = e instanceof Error ? e.message : "Failed to check status";
+        setPollError(msg);
+        return true;
       }
       return false;
     };
@@ -55,6 +67,15 @@ export function IngestionStatus({ jobId, onComplete }: IngestionStatusProps) {
 
     return () => clearInterval(interval);
   }, [jobId, navigate, onComplete]);
+
+  if (pollError) {
+    return (
+      <div className="rounded-xl border border-error/50 bg-error/10 px-4 py-3 text-sm text-error dark:border-error/30">
+        <p className="font-medium">Error</p>
+        <p>{pollError}</p>
+      </div>
+    );
+  }
 
   if (!status) {
     return (

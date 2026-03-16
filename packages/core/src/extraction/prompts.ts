@@ -1,4 +1,5 @@
 import { create, all } from "mathjs";
+import { writeFileSync } from "fs";
 import type { ExerciseSet } from "../types/exercise";
 import { exerciseSetSchema } from "../exerciseSchema";
 
@@ -114,7 +115,17 @@ export function parseAndValidateExerciseSet(raw: string): ExerciseSet {
     trimmed = jsonMatch[0];
   }
 
-  const parsed = JSON.parse(trimmed) as unknown;
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(trimmed);
+  } catch (err) {
+    if (process.env.DEBUG_LLM_OUTPUT === "true") {
+      const dumpPath = `/tmp/llm-parse-error-${Date.now()}.txt`;
+      writeFileSync(dumpPath, `=== RAW ===\n${raw}\n\n=== TRIMMED ===\n${trimmed}\n`);
+      console.error(`[extraction] JSON.parse failed. Dumped to ${dumpPath}`);
+    }
+    throw err;
+  }
   const result = exerciseSetSchema.parse(parsed) as ExerciseSet;
 
   for (const q of result.questions) {

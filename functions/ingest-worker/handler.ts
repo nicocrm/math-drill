@@ -26,6 +26,9 @@ export async function handleIngest(payload: IngestPayload): Promise<void> {
     const pdfBuffer = await fileStorage.download(s3Key);
     const pdfBase64 = pdfBuffer.toString("base64");
 
+    const provider = process.env.EXTRACTION_PROVIDER?.toLowerCase() ?? "anthropic";
+    console.log(`[ingest-worker] Job ${jobId}: calling extraction provider=${provider}`);
+
     const exercise = await generateExercisesFromPdf(pdfBase64, filename);
     await jobStore.updateProgress(jobId, "validating");
 
@@ -45,8 +48,16 @@ export async function handleIngest(payload: IngestPayload): Promise<void> {
 
     console.log(`[ingest-worker] Job ${jobId} completed: ${exercise.questions.length} questions`);
   } catch (err) {
-    const error = err instanceof Error ? err.message : String(err);
-    console.error("[ingest-worker] Job failed:", { jobId, filename, error });
+    const e = err instanceof Error ? err : new Error(String(err));
+    const error = e.message;
+    console.error("[ingest-worker] Job failed:", {
+      jobId,
+      filename,
+      error,
+      name: e.name,
+      cause: e.cause,
+      stack: e.stack,
+    });
     await jobStore.set(jobId, { status: "error", error, progress: 0 });
   }
 }

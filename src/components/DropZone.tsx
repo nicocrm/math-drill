@@ -1,4 +1,3 @@
-
 import { useCallback, useState } from "react";
 import { useAuth } from "@clerk/react";
 import { useDropzone } from "react-dropzone";
@@ -12,12 +11,14 @@ interface DropZoneProps {
 export function DropZone({ onJobStarted }: DropZoneProps) {
   const { getToken } = useAuth();
   const [uploading, setUploading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const onDrop = useCallback(
     async (acceptedFiles: File[]) => {
       if (acceptedFiles.length === 0) return;
       const file = acceptedFiles[0];
       setUploading(true);
+      setError(null);
       try {
         const token = await getToken();
         const formData = new FormData();
@@ -28,14 +29,22 @@ export function DropZone({ onJobStarted }: DropZoneProps) {
           body: formData,
         });
         if (!res.ok) {
-          throw new Error("Upload failed");
+          let message = "Upload failed";
+          try {
+            const body = (await res.json()) as { error?: string };
+            if (body.error) message = body.error;
+          } catch {
+            /* use default */
+          }
+          throw new Error(message);
         }
         const data = (await res.json()) as { jobId: string };
         if (data.jobId) {
           onJobStarted?.(data.jobId);
         }
-      } catch {
-        setUploading(false);
+      } catch (e) {
+        const msg = e instanceof Error ? e.message : "Upload failed";
+        setError(msg);
       } finally {
         setUploading(false);
       }
@@ -61,6 +70,11 @@ export function DropZone({ onJobStarted }: DropZoneProps) {
     >
       <input {...getInputProps()} />
       <div className="flex flex-col items-center justify-center gap-2 py-8 text-center">
+        {error && (
+          <div className="w-full rounded-lg border border-error/50 bg-error/10 px-3 py-2 text-sm text-error">
+            {error}
+          </div>
+        )}
         <svg
           className="h-12 w-12 text-muted-foreground"
           fill="none"

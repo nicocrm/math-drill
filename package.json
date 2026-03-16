@@ -7,7 +7,7 @@
     "packages/*"
   ],
   "scripts": {
-    "dev": "INGEST_WORKER_URL=http://localhost:3002 concurrently -n ui,api -c cyan,green \"vite\" \"npx tsx --watch functions/dev-server.ts\"",
+    "dev": "INGEST_WORKER_URL=http://localhost:3002 concurrently -n ui,api,worker -c cyan,green,yellow \"vite\" \"npx tsx --watch functions/dev-server.ts\" \"npx tsx --watch functions/dev-worker.ts\"",
     "dev:ui": "vite",
     "build": "vite build",
     "preview": "vite preview",
@@ -40,13 +40,16 @@
   "devDependencies": {
     "@playwright/test": "^1.58.2",
     "@types/express": "^5.0.0",
+    "@types/multer": "^2.1.0",
     "@types/node": "^25.3.5",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.0.1",
     "concurrently": "^9.2.1",
+    "dotenv": "^16.4.5",
     "eslint": "^9.7.0",
     "eslint-plugin-react-hooks": "^5.0.0",
+    "multer": "^2.1.1",
     "postcss": "^8",
     "tailwindcss": "^3.0.0",
     "tsx": "^4.19.0",
