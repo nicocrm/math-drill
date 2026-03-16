@@ -38,6 +38,11 @@ variable "openai_api_key" {
   sensitive = true
 }
 
+variable "extraction_provider" {
+  description = "AI provider for PDF extraction: 'anthropic' or 'openai'. Must match which API key is set."
+  default     = "openai"
+}
+
 variable "clerk_publishable_key" {
   description = "Clerk publishable key (VITE_CLERK_PUBLISHABLE_KEY for frontend build)"
   default     = ""
@@ -73,6 +78,23 @@ resource "scaleway_iam_api_key" "functions" {
 resource "scaleway_object_bucket" "exercises" {
   name   = var.s3_bucket
   region = var.region
+
+  lifecycle_rule {
+    id      = "expire-status"
+    prefix  = "status/"
+    enabled = true
+    expiration {
+      days = 2
+    }
+  }
+  lifecycle_rule {
+    id      = "expire-intake"
+    prefix  = "intake/"
+    enabled = true
+    expiration {
+      days = 2
+    }
+  }
 }
 
 resource "scaleway_object_bucket" "frontend" {
@@ -98,17 +120,31 @@ resource "scaleway_object_bucket_website_configuration" "frontend" {
   }
 }
 
-# --- NATS ---
+# --- SQS (Messaging and Queuing) ---
 
-resource "scaleway_mnq_nats_account" "main" {
-  name   = "math-drill"
+resource "scaleway_mnq_sqs" "main" {
   region = var.region
 }
 
-resource "scaleway_mnq_nats_credentials" "functions" {
-  account_id = scaleway_mnq_nats_account.main.id
-  name       = "functions"
+resource "scaleway_mnq_sqs_credentials" "functions" {
+  region = var.region
+  permissions {
+    can_manage  = true  # Required for Terraform to create queues (CreateQueue API)
+    can_publish = true
+    can_receive = true
+  }
+}
+
+resource "scaleway_mnq_sqs_queue" "ingest_jobs" {
   region     = var.region
+  name       = "ingest-jobs"
+  access_key = scaleway_mnq_sqs_credentials.functions.access_key
+  secret_key = scaleway_mnq_sqs_credentials.functions.secret_key
+  sqs_endpoint = scaleway_mnq_sqs.main.endpoint
+
+  message_max_age            = 86400  # 24h retention
+  visibility_timeout_seconds = 300    # 5 min (matches worker timeout)
+  receive_wait_time_seconds = 10     # long polling
 }
 
 # --- Serverless Functions Namespace ---
@@ -117,21 +153,25 @@ resource "scaleway_function_namespace" "main" {
   name = "math-drill"
 
   environment_variables = {
-    STORAGE        = "s3"
-    S3_BUCKET      = scaleway_object_bucket.exercises.name
-    S3_ENDPOINT    = "https://s3.${var.region}.scw.cloud"
-    S3_REGION      = var.region
-    NATS_URL       = scaleway_mnq_nats_account.main.endpoint
-    ALLOWED_ORIGIN = "https://${scaleway_object_bucket_website_configuration.frontend.website_endpoint}"
+    STORAGE             = "s3"
+    S3_BUCKET           = scaleway_object_bucket.exercises.name
+    S3_ENDPOINT         = "https://s3.${var.region}.scw.cloud"
+    S3_REGION           = var.region
+    SQS_QUEUE_URL       = scaleway_mnq_sqs_queue.ingest_jobs.url
+    SQS_ENDPOINT        = scaleway_mnq_sqs.main.endpoint
+    SQS_REGION          = var.region
+    ALLOWED_ORIGIN      = "https://${scaleway_object_bucket_website_configuration.frontend.website_endpoint}"
+    EXTRACTION_PROVIDER = var.extraction_provider
   }
 
   secret_environment_variables = {
-    CLERK_SECRET_KEY      = var.clerk_secret_key
-    ANTHROPIC_API_KEY     = var.anthropic_api_key
-    OPENAI_API_KEY        = var.openai_api_key
-    AWS_ACCESS_KEY_ID     = scaleway_iam_api_key.functions.access_key
-    AWS_SECRET_ACCESS_KEY = scaleway_iam_api_key.functions.secret_key
-    NATS_CREDS            = scaleway_mnq_nats_credentials.functions.file
+    CLERK_SECRET_KEY       = var.clerk_secret_key
+    ANTHROPIC_API_KEY      = var.anthropic_api_key
+    OPENAI_API_KEY         = var.openai_api_key
+    AWS_ACCESS_KEY_ID      = scaleway_iam_api_key.functions.access_key
+    AWS_SECRET_ACCESS_KEY  = scaleway_iam_api_key.functions.secret_key
+    SQS_ACCESS_KEY_ID      = scaleway_mnq_sqs_credentials.functions.access_key
+    SQS_SECRET_ACCESS_KEY  = scaleway_mnq_sqs_credentials.functions.secret_key
   }
 }
 
@@ -215,15 +255,14 @@ resource "scaleway_function" "ingest_worker" {
   deploy       = true
 }
 
-# --- NATS Trigger ---
+# --- SQS Trigger ---
 
 resource "scaleway_function_trigger" "ingest_trigger" {
   function_id = scaleway_function.ingest_worker.id
   name        = "ingest-jobs-trigger"
 
-  nats {
-    account_id = scaleway_mnq_nats_account.main.id
-    subject    = "ingest.jobs"
+  sqs {
+    queue = scaleway_mnq_sqs_queue.ingest_jobs.name
   }
 }
 
@@ -249,8 +288,8 @@ output "get_ingest_status_url" {
   value = scaleway_function.get_ingest_status.domain_name
 }
 
-output "nats_endpoint" {
-  value = scaleway_mnq_nats_account.main.endpoint
+output "sqs_queue_url" {
+  value = scaleway_mnq_sqs_queue.ingest_jobs.url
 }
 
 output "s3_bucket" {

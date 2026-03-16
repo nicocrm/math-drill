@@ -10,8 +10,8 @@ export interface IngestPayload {
 }
 
 /**
- * Core ingest logic — shared between the Scaleway NATS-triggered function
- * and the local dev-worker.
+ * Core ingest logic — shared between the Scaleway SQS-triggered function
+ * and the local dev-worker (HTTP).
  */
 export async function handleIngest(payload: IngestPayload): Promise<void> {
   const { jobId, exerciseId, s3Key, filename, userId } = payload;
@@ -52,14 +52,18 @@ export async function handleIngest(payload: IngestPayload): Promise<void> {
 }
 
 /**
- * Scaleway NATS-triggered function handler.
- * Scaleway delivers the NATS message body as the event body.
+ * Scaleway SQS-triggered function handler.
+ * Scaleway delivers SQS messages to the function. The event may be:
+ * - { body: string } — raw message body (simple format)
+ * - { Records: [{ body: string }] } — full SQS event format
  */
 export async function handle(
-  event: { body: string },
+  event: { body?: string; Records?: Array<{ body: string }> },
   _context: unknown
 ): Promise<{ statusCode: number; body: string }> {
-  const payload = JSON.parse(event.body) as IngestPayload;
+  const body =
+    event.Records?.[0]?.body ?? event.body ?? "{}";
+  const payload = JSON.parse(body) as IngestPayload;
   console.log(`[ingest-worker] Received job: ${payload.jobId} (${payload.filename})`);
   await handleIngest(payload);
   return { statusCode: 200, body: JSON.stringify({ ok: true }) };

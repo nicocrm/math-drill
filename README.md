@@ -48,6 +48,14 @@ npm run dev
 
 This starts the Vite dev server (UI) and the API dev server. Open [http://localhost:3000](http://localhost:3000).
 
+**PDF ingestion:** For PDF uploads to work locally, run the ingest worker in a second terminal:
+
+```bash
+npm run dev:worker
+```
+
+The dev server is configured with `INGEST_WORKER_URL=http://localhost:3002` so post-ingest will trigger the worker via HTTP.
+
 ## Environment Variables
 
 | Variable | Default | Description |
@@ -66,13 +74,15 @@ This starts the Vite dev server (UI) and the API dev server. Open [http://localh
 | `VITE_DELETE_EXERCISE_URL` | — | Delete exercise (production) |
 | `VITE_POST_INGEST_URL` | — | Upload PDF / start ingest (production) |
 | `VITE_GET_INGEST_STATUS_URL` | — | Poll ingest job status (production) |
+| `INGEST_WORKER_URL` | — | Worker URL for local dev (default: http://localhost:3002 when running dev) |
+| `INGEST_WORKER_PORT` | `3002` | Port for dev-worker HTTP server |
 
 ## Running Tests
 
 ```bash
 npm run test        # Vitest unit tests
 npm run test:e2e    # Playwright E2E tests (Chromium, port 3002)
-npm run test:integration   # NATS integration tests (requires: docker compose up -d nats)
+npm run test:integration   # Integration tests
 ```
 
 First-time Playwright setup:
@@ -115,9 +125,9 @@ Open [http://localhost:4173](http://localhost:4173); the frontend will call the 
 
 The backend API and ingest pipeline can be deployed to **Scaleway** using Terraform. The configuration provisions:
 
-- **Object Storage (S3-compatible)** — bucket for exercise JSON files and uploaded PDFs
-- **NATS** — message queue for ingest jobs; triggers the ingest worker when a job is enqueued
-- **Serverless Functions** — HTTP endpoints for exercises CRUD, ingest, and ingest status; plus a private NATS-triggered ingest worker
+- **Object Storage (S3-compatible)** — bucket for exercise JSON files, uploaded PDFs, and job status; lifecycle rules expire `status/` and `intake/` after 48h
+- **SQS** — message queue for ingest jobs; triggers the ingest worker when a job is enqueued
+- **Serverless Functions** — HTTP endpoints for exercises CRUD, ingest, and ingest status; plus a private SQS-triggered ingest worker
 
 ### Prerequisites
 
@@ -147,7 +157,7 @@ terraform plan -var="clerk_secret_key=..." -var="openai_api_key=..."
 terraform apply
 ```
 
-After `apply`, Terraform outputs the function URLs and NATS endpoint. For production, build the frontend with the five endpoint-specific env vars set from Terraform outputs:
+After `apply`, Terraform outputs the function URLs. For production, build the frontend with the five endpoint-specific env vars set from Terraform outputs:
 
 ```bash
 make build-frontend
@@ -164,7 +174,7 @@ This runs `terraform -chdir=terraform output -raw` for each URL and passes them 
 | `delete_exercise_url` | URL for deleting an exercise |
 | `post_ingest_url` | URL for uploading PDFs and starting ingest |
 | `get_ingest_status_url` | URL for polling ingest job status |
-| `nats_endpoint` | NATS server endpoint (for worker connectivity) |
+| `sqs_queue_url` | SQS queue URL for ingest jobs |
 | `s3_bucket` | Object Storage bucket name |
 
 ### Function Code Deployment
@@ -183,12 +193,12 @@ Terraform references the zips via `zip_file` / `zip_hash`, so it redeploys autom
 
 - **Monorepo** — `packages/core` contains shared types, storage interfaces, extraction logic, and job status management; `functions/` contains serverless handlers; the Vite + React app is the frontend
 - **Adapter pattern** — `ExerciseStorage` and `FileStorage` interfaces with pluggable implementations: S3 for production, local filesystem for dev
-- **Async ingest pipeline** — `POST /api/ingest` saves the PDF and publishes a NATS message; the `ingest-worker` (NATS-triggered) handles extraction, validation, and saving; clients poll status via `GET /api/ingest/status`
-- **NATS KV for job status** — job progress is tracked in a NATS KV bucket (`ingest-jobs`) with TTL, replacing the previous in-memory store and enabling distributed access across function instances
+- **Async ingest pipeline** — `POST /api/ingest` saves the PDF to S3, writes job status to `status/{jobId}.json`, and sends a message to SQS; the `ingest-worker` (SQS-triggered) handles extraction, validation, and saving; clients poll status via `GET /api/ingest/status`
+- **S3 for job status** — job progress is tracked in S3 `status/{jobId}.json`; lifecycle rules expire status and intake files after 48h
 - **Sessions are client-side only** — stored in `localStorage`, no server persistence
 - **Auth is API-level** — no middleware route protection; `/admin` page is accessible without login but upload will 401
 - **AI generates original questions** — the system prompt instructs the AI to create fresh exercises inspired by the PDF, not extract verbatim content
 
 ## Tech Stack
 
-Vite, React 19, React Router, TypeScript, Tailwind CSS, Clerk, KaTeX, mathjs, Zod, Playwright, Vitest, NATS, AWS S3 SDK, Terraform (Scaleway)
+Vite, React 19, React Router, TypeScript, Tailwind CSS, Clerk, KaTeX, mathjs, Zod, Playwright, Vitest, AWS S3/SQS SDK, Terraform (Scaleway)

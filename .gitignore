@@ -41,6 +41,7 @@ terraform/terraform.tfvars
 # server-side storage
 /exercises/
 /intake/
+/status/
 
 # typescript
 *.tsbuildinfo

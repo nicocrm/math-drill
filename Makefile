@@ -5,7 +5,7 @@ FUNCTIONS := get-exercises get-exercise delete-exercise post-ingest get-ingest-s
 DIST      := dist/functions
 ZIPS      := $(addprefix $(DIST)/,$(addsuffix .zip,$(FUNCTIONS)))
 
-.PHONY: all clean functions build-frontend deploy-frontend deploy
+.PHONY: all clean functions build-frontend deploy-frontend deploy terraform
 
 all: functions
 
@@ -36,7 +36,10 @@ deploy-frontend: build-frontend
 		--exclude "assets/*" \
 		--delete
 
-deploy: functions deploy-frontend
+terraform:
+	cd terraform && terraform apply
+
+deploy: functions terraform deploy-frontend
 
 functions: $(ZIPS)
 

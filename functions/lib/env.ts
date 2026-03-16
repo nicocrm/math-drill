@@ -2,8 +2,8 @@ import { S3ExerciseStorage } from "@math-drill/core/storage/s3ExerciseStorage";
 import { S3FileStorage } from "@math-drill/core/storage/s3FileStorage";
 import { LocalExerciseStorage } from "@math-drill/core/storage/localExerciseStorage";
 import { LocalFileStorage } from "@math-drill/core/storage/localFileStorage";
-import { NatsJobStatusStore } from "@math-drill/core/jobStatus/natsJobStatusStore";
-import { MemoryJobStatusStore } from "@math-drill/core/jobStatus/memoryJobStatusStore";
+import { S3JobStatusStore } from "@math-drill/core/jobStatus/s3JobStatusStore";
+import { FileJobStatusStore } from "@math-drill/core/jobStatus/fileJobStatusStore";
 import type { ExerciseStorage, FileStorage } from "@math-drill/core";
 import type { JobStatusStore } from "@math-drill/core";
 
@@ -45,13 +45,15 @@ export function getFileStorage(): FileStorage {
 export function getJobStatusStore(): JobStatusStore {
   if (jobStatusStore) return jobStatusStore;
 
-  if (process.env.NATS_URL) {
-    jobStatusStore = new NatsJobStatusStore({
-      servers: process.env.NATS_URL,
-      creds: process.env.NATS_CREDS,
+  if (process.env.STORAGE === "s3") {
+    jobStatusStore = new S3JobStatusStore({
+      bucket: process.env.S3_BUCKET!,
+      endpoint: process.env.S3_ENDPOINT,
+      region: process.env.S3_REGION,
+      prefix: "status",
     });
   } else {
-    jobStatusStore = new MemoryJobStatusStore();
+    jobStatusStore = new FileJobStatusStore();
   }
   return jobStatusStore;
 }

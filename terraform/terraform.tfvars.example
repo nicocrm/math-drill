@@ -4,4 +4,5 @@ s3_bucket         = "math-drill-exercises"
 clerk_publishable_key = "pk_live_..."  # from Clerk dashboard (frontend)
 clerk_secret_key      = "sk_live_..."  # from Clerk dashboard (backend)
 anthropic_api_key = ""              # optional, if using Anthropic provider
-openai_api_key    = "sk-..."       # required, from OpenAI
+openai_api_key    = "sk-..."       # required when extraction_provider=openai
+extraction_provider = "openai"     # "anthropic" or "openai" - must match which API key is set

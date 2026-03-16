@@ -1,22 +1,34 @@
-import { connect } from "nats";
+import { createServer, type IncomingMessage, type ServerResponse } from "http";
 import { handleIngest, type IngestPayload } from "./ingest-worker/handler";
 
-const NATS_URL = process.env.NATS_URL ?? "nats://localhost:4222";
+const PORT = parseInt(process.env.INGEST_WORKER_PORT ?? "3002", 10);
 
-async function main() {
-  console.log(`[worker] Connecting to NATS at ${NATS_URL}...`);
-  const nc = await connect({ servers: NATS_URL });
-  console.log("[worker] Connected. Subscribing to ingest.jobs...");
+const server = createServer(async (req: IncomingMessage, res: ServerResponse) => {
+  if (req.method !== "POST" || req.url !== "/") {
+    res.writeHead(404);
+    res.end();
+    return;
+  }
 
-  const sub = nc.subscribe("ingest.jobs");
-  for await (const msg of sub) {
-    const payload = JSON.parse(new TextDecoder().decode(msg.data)) as IngestPayload;
+  let body = "";
+  for await (const chunk of req) {
+    body += chunk.toString();
+  }
+
+  try {
+    const payload = JSON.parse(body) as IngestPayload;
     console.log(`[worker] Received job: ${payload.jobId} (${payload.filename})`);
     await handleIngest(payload);
+    res.writeHead(200, { "Content-Type": "application/json" });
+    res.end(JSON.stringify({ ok: true }));
+  } catch (err) {
+    console.error("[worker] Error:", err);
+    res.writeHead(500, { "Content-Type": "application/json" });
+    res.end(JSON.stringify({ error: err instanceof Error ? err.message : String(err) }));
   }
-}
+});
 
-main().catch((err) => {
-  console.error("[worker] Fatal error:", err);
-  process.exit(1);
+server.listen(PORT, () => {
+  console.log(`[worker] HTTP server listening on http://localhost:${PORT}`);
+  console.log(`[worker] Set INGEST_WORKER_URL=http://localhost:${PORT} when running dev-server for local ingest`);
 });

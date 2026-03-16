@@ -36,7 +36,8 @@ Return a single JSON object matching this schema:
 Rules:
 - For prompt text with math, use $...$ delimiters. LaTeX inside: e.g. $\\\\frac{1}{2}$ or $x^2$.
 - For choice.latex, use pure LaTeX only (no $ delimiters), e.g. \\\\left(\\\\frac{2}{3}\\\\right)^2.
-- answerMath: For numeric/expression use mathjs-evaluable string (e.g. "2/3", "(1/2)^3").
+- answerMath: For numeric/expression use a mathjs-evaluable string that evaluates to a NUMBER (e.g. "2/3", "(1/2)^3", "sqrt(2)"). NO free variables (x, y, n, etc.)—the expression must evaluate to a concrete number.
+- answerMath: For questions with symbolic answers (polynomials, factored forms, expressions containing variables), use type "open" and answerMath: null.
 - answerMath: For multiple_choice use string[] of correct choice ids.
 - answerMath: For true_false use EXACTLY the lowercase strings "true" or "false" (never "vrai", "faux", "True", "False", "yes", "no", etc.).
 - answerMath: For type "open" use null (ungraded).

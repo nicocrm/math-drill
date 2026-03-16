@@ -1,9 +1,54 @@
 import { v4 as uuidv4 } from "uuid";
-import { connect, credsAuthenticator } from "nats";
+import { SQSClient, SendMessageCommand } from "@aws-sdk/client-sqs";
 import { verifyAuth, requireAuth, HttpError } from "@math-drill/core/auth";
 import { getFileStorage, getJobStatusStore } from "../lib/env";
 import type { ScalewayEvent, ScalewayResponse } from "../lib/scaleway";
 import { jsonResponse, handleCorsPreflightMaybe } from "../lib/scaleway";
+
+async function triggerIngestWorker(payload: {
+  jobId: string;
+  exerciseId: string;
+  s3Key: string;
+  filename: string;
+  userId: string;
+}): Promise<void> {
+  const queueUrl = process.env.SQS_QUEUE_URL;
+  const workerUrl = process.env.INGEST_WORKER_URL;
+
+  if (queueUrl) {
+    const endpoint = process.env.SQS_ENDPOINT ?? new URL(queueUrl).origin;
+    const client = new SQSClient({
+      endpoint,
+      region: process.env.SQS_REGION ?? "fr-par",
+      credentials:
+        process.env.SQS_ACCESS_KEY_ID && process.env.SQS_SECRET_ACCESS_KEY
+          ? {
+              accessKeyId: process.env.SQS_ACCESS_KEY_ID,
+              secretAccessKey: process.env.SQS_SECRET_ACCESS_KEY,
+            }
+          : undefined,
+    });
+    await client.send(
+      new SendMessageCommand({
+        QueueUrl: queueUrl,
+        MessageBody: JSON.stringify(payload),
+      })
+    );
+    console.log(`[post-ingest] Sent to SQS: jobId=${payload.jobId}`);
+  } else if (workerUrl) {
+    const resp = await fetch(workerUrl, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    if (!resp.ok) {
+      throw new Error(`Worker returned ${resp.status}: ${await resp.text()}`);
+    }
+    console.log(`[post-ingest] Triggered worker via HTTP: jobId=${payload.jobId}`);
+  } else {
+    console.warn("[post-ingest] SQS_QUEUE_URL and INGEST_WORKER_URL not set — ingest worker will not run");
+  }
+}
 
 export async function handle(
   event: ScalewayEvent
@@ -61,27 +106,13 @@ export async function handle(
     await jobStore.updateProgress(jobId, "saving");
     await fileStorage.upload(s3Key, pdfBuffer);
 
-    // Publish NATS message to trigger ingest worker
-    if (process.env.NATS_URL) {
-      console.log(`[post-ingest] Connecting to NATS at ${process.env.NATS_URL}...`);
-      const natsOpts = process.env.NATS_CREDS
-        ? { authenticator: credsAuthenticator(new TextEncoder().encode(process.env.NATS_CREDS)) }
-        : {};
-      const nc = await connect({ servers: process.env.NATS_URL, ...natsOpts });
-      const payload = JSON.stringify({
-        jobId,
-        exerciseId,
-        s3Key,
-        filename,
-        userId: auth.userId,
-      });
-      nc.publish("ingest.jobs", new TextEncoder().encode(payload));
-      await nc.flush();
-      await nc.close();
-      console.log(`[post-ingest] Published to ingest.jobs: jobId=${jobId}`);
-    } else {
-      console.warn("[post-ingest] NATS_URL not set — skipping publish");
-    }
+    await triggerIngestWorker({
+      jobId,
+      exerciseId,
+      s3Key,
+      filename,
+      userId: auth.userId,
+    });
 
     return jsonResponse(200, { jobId });
   } catch (err) {

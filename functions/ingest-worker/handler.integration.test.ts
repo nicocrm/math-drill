@@ -1,5 +1,4 @@
 import { describe, it, expect, vi, beforeAll, afterAll } from "vitest";
-import { connect, type NatsConnection } from "nats";
 import { handleIngest, type IngestPayload } from "./handler";
 import { MemoryJobStatusStore } from "@math-drill/core/jobStatus/memoryJobStatusStore";
 import { LocalExerciseStorage } from "@math-drill/core/storage/localExerciseStorage";
@@ -111,34 +110,3 @@ describe("ingest-worker handler", () => {
   });
 });
 
-describe("ingest-worker NATS integration", () => {
-  let nc: NatsConnection | null = null;
-
-  beforeAll(async () => {
-    const natsUrl = process.env.NATS_URL;
-    if (!natsUrl) return;
-
-    try {
-      nc = await connect({ servers: natsUrl });
-    } catch {
-      nc = null;
-    }
-  });
-
-  afterAll(async () => {
-    if (nc) await nc.drain();
-  });
-
-  it("can publish and receive on ingest.jobs subject", async () => {
-    if (!nc) return; // skip if NATS not available
-
-    const payload = { jobId: "test", exerciseId: "test", s3Key: "test", filename: "test.pdf", userId: "user" };
-    const sub = nc.subscribe("ingest.jobs", { max: 1 });
-    nc.publish("ingest.jobs", new TextEncoder().encode(JSON.stringify(payload)));
-
-    for await (const msg of sub) {
-      const received = JSON.parse(new TextDecoder().decode(msg.data));
-      expect(received.jobId).toBe("test");
-    }
-  });
-});
