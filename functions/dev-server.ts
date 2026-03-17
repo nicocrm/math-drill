@@ -1,6 +1,5 @@
 import "dotenv/config";
 import express from "express";
-import multer from "multer";
 import type { Request, Response } from "express";
 import type { ScalewayEvent } from "./lib/scaleway";
 import { handle as getExercises } from "./get-exercises/handler";
@@ -30,7 +29,6 @@ function toScalewayEvent(req: Request): ScalewayEvent {
     isBase64Encoded: Buffer.isBuffer(req.body),
   };
 }
-
 function wrapHandler(handler: (event: ScalewayEvent) => Promise<{ statusCode: number; headers?: Record<string, string>; body: string }>) {
   return async (req: Request, res: Response) => {
     try {
@@ -69,19 +67,10 @@ app.use((_req, res, next) => {
 app.use(express.json({ limit: "50mb" }));
 app.use(express.raw({ type: "application/pdf", limit: "50mb" }));
 
-const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 50 * 1024 * 1024 } });
-
 app.get("/api/exercises", wrapHandler(getExercises));
 app.get("/api/exercises/:id", wrapHandler(getExercise));
 app.delete("/api/exercises/:id", wrapHandler(deleteExercise));
-app.post("/api/ingest", upload.single("file"), (req: Request, res: Response, next) => {
-  // If a file was uploaded via multipart, convert to JSON body for the handler
-  if (req.file) {
-    req.body = { pdf: req.file.buffer.toString("base64"), filename: req.file.originalname };
-    req.headers["content-type"] = "application/json";
-  }
-  next();
-}, wrapHandler(postIngest));
+app.post("/api/ingest", wrapHandler(postIngest));
 app.get("/api/ingest/status", wrapHandler(getIngestStatus));
 
 const PORT = process.env.API_PORT ?? 3001;

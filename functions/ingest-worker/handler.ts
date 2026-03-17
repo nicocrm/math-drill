@@ -49,7 +49,9 @@ export async function handleIngest(payload: IngestPayload): Promise<void> {
     console.log(`[ingest-worker] Job ${jobId} completed: ${exercise.questions.length} questions`);
   } catch (err) {
     const e = err instanceof Error ? err : new Error(String(err));
-    const error = e.message;
+    const error = e.message.startsWith("not_math_exercise: ")
+      ? e.message.slice("not_math_exercise: ".length)
+      : e.message;
     console.error("[ingest-worker] Job failed:", {
       jobId,
       filename,

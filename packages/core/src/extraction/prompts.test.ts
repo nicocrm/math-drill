@@ -87,18 +87,37 @@ const FIXTURE_DIR = join(
   "../../../../tests/fixtures"
 );
 
-describe("parseAndValidateExerciseSet - LaTeX escaping", () => {
-  it("fixes invalid JSON escapes from LLM (single backslash in \\sqrt, \\frac)", () => {
-    // LLMs output \sqrt, \frac etc.; JSON only allows \" \\ \/ \b \f \n \r \t \uXXXX
-    // \s, \l, \a etc. cause "Bad escaped character" - we sanitize by doubling them
-    const raw = `{"id":"ex-1","filename":"t.pdf","title":"T","subject":"m","createdAt":"2025-01-01T00:00:00Z","sections":[{"id":"s1","label":"S","maxPoints":1}],"questions":[{"id":"q1","type":"numeric","section":"s1","points":1,"prompt":"What is $\\sqrt{2}$?","answerMath":"sqrt(2)","answerLatex":"\\sqrt{2}","requiresSteps":false,"requiresExample":false}]}`;
+describe("parseAndValidateExerciseSet - LaTeX in valid JSON", () => {
+  it("parses correctly escaped LaTeX (\\\\sqrt, \\\\frac) from valid JSON", () => {
+    // With structured output the model returns properly escaped JSON
+    const raw = JSON.stringify({
+      id: "ex-1", filename: "t.pdf", title: "T", subject: "m",
+      createdAt: "2025-01-01T00:00:00Z",
+      sections: [{ id: "s1", label: "S", maxPoints: 1 }],
+      questions: [{
+        id: "q1", type: "numeric", section: "s1", points: 1,
+        prompt: "What is $\\sqrt{2}$?",
+        answerMath: "sqrt(2)", answerLatex: "\\sqrt{2}",
+        requiresSteps: false,
+      }],
+    });
     const result = parseAndValidateExerciseSet(raw);
     expect(result.questions[0].prompt).toBe("What is $\\sqrt{2}$?");
     expect(result.questions[0].answerLatex).toBe("\\sqrt{2}");
   });
 
-  it("leaves valid JSON escapes unchanged (\\n, \\t)", () => {
-    const raw = `{"id":"ex-1","filename":"t.pdf","title":"T","subject":"m","createdAt":"2025-01-01T00:00:00Z","sections":[{"id":"s1","label":"S","maxPoints":1}],"questions":[{"id":"q1","type":"numeric","section":"s1","points":1,"prompt":"Line1\\nLine2","answerMath":"1","answerLatex":"1","requiresSteps":false,"requiresExample":false}]}`;
+  it("parses valid JSON escapes (\\n, \\t) correctly", () => {
+    const raw = JSON.stringify({
+      id: "ex-1", filename: "t.pdf", title: "T", subject: "m",
+      createdAt: "2025-01-01T00:00:00Z",
+      sections: [{ id: "s1", label: "S", maxPoints: 1 }],
+      questions: [{
+        id: "q1", type: "numeric", section: "s1", points: 1,
+        prompt: "Line1\nLine2",
+        answerMath: "1", answerLatex: "1",
+        requiresSteps: false,
+      }],
+    });
     const result = parseAndValidateExerciseSet(raw);
     expect(result.questions[0].prompt).toBe("Line1\nLine2");
   });
@@ -124,5 +143,43 @@ describe("parseAndValidateExerciseSet - explanation", () => {
     expect(result.questions[0].explanation).toBe(
       "Addition combines two numbers to find their total."
     );
+  });
+});
+
+describe("parseAndValidateExerciseSet - not_math_exercise sentinel", () => {
+  it("throws with model message when error is not_math_exercise", () => {
+    const raw = JSON.stringify({ error: "not_math_exercise", message: "This is a recipe book." });
+    expect(() => parseAndValidateExerciseSet(raw)).toThrow("This is a recipe book.");
+  });
+
+  it("throws a fallback message when no message field", () => {
+    const raw = JSON.stringify({ error: "not_math_exercise" });
+    expect(() => parseAndValidateExerciseSet(raw)).toThrow(
+      "The uploaded document does not appear to contain math exercises."
+    );
+  });
+
+  it("does not throw for a normal exercise set", () => {
+    const raw = JSON.stringify({
+      id: "00000000-0000-0000-0000-000000000001",
+      filename: "test.pdf",
+      title: "Test",
+      subject: "Math",
+      createdAt: new Date().toISOString(),
+      sections: [{ id: "s1", label: "Section 1", maxPoints: 10 }],
+      questions: [
+        {
+          id: "q1",
+          type: "numeric",
+          section: "s1",
+          points: 2,
+          prompt: "What is $1+1$?",
+          answerMath: "2",
+          answerLatex: "2",
+          requiresSteps: false,
+        },
+      ],
+    });
+    expect(() => parseAndValidateExerciseSet(raw)).not.toThrow();
   });
 });

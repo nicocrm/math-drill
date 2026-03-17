@@ -15,11 +15,12 @@
     "paths": {
       "@/*": ["./src/*"]
     },
-    "target": "ES2017"
+    "target": "ESNext"
   },
   "include": [
     "src/**/*.ts",
-    "src/**/*.tsx"
+    "src/**/*.tsx",
+    "env.d.ts"
   ],
   "exclude": [
     "node_modules"

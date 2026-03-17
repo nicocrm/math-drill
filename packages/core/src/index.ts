@@ -22,7 +22,6 @@ export {
 
 // Extraction
 export { SYSTEM_PROMPT, validateAnswerMath, parseAndValidateExerciseSet } from "./extraction/prompts";
-export { generateExercisesFromPdfAnthropic } from "./extraction/anthropicProvider";
 export { generateExercisesFromPdfOpenAI } from "./extraction/openaiProvider";
 export { verifyExplanations } from "./extraction/verifyExplanations";
 export { generateExercisesFromPdf } from "./generateExercisesFromPdf";

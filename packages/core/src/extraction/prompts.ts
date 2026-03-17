@@ -1,11 +1,15 @@
 import { create, all } from "mathjs";
-import { writeFileSync } from "fs";
 import type { ExerciseSet } from "../types/exercise";
 import { exerciseSetSchema } from "../exerciseSchema";
 
 const math = create(all);
 
 export const SYSTEM_PROMPT = `You are an expert at creating math exercises. Your task is to GENERATE NEW exercises inspired by a reference PDF—not to copy or extract the exact exercises from it.
+
+If the PDF does not appear to contain math exercises or math homework (e.g., it is a novel, a news article, an image without math content, a blank page, etc.), respond with ONLY this JSON and nothing else:
+{"error": "not_math_exercise", "message": "<brief human-readable reason>"}
+
+Otherwise:
 
 Use the PDF as a template: match its subject, difficulty, question types, section structure, and pedagogical style. But create entirely NEW questions with different numbers, different wording, and different prompts. Do not reproduce the PDF's exercises verbatim. Preserve a similar section structure (e.g., same number of sections and labels) if the PDF has sections.
 
@@ -109,22 +113,25 @@ export function validateAnswerMath(question: {
 }
 
 export function parseAndValidateExerciseSet(raw: string): ExerciseSet {
-  let trimmed = raw.trim();
-  const jsonMatch = trimmed.match(/\{[\s\S]*\}/);
-  if (jsonMatch) {
-    trimmed = jsonMatch[0];
-  }
-
+  // Structured output from OpenAI is guaranteed to be valid JSON.
   let parsed: unknown;
   try {
-    parsed = JSON.parse(trimmed);
+    parsed = JSON.parse(raw);
   } catch (err) {
-    if (process.env.DEBUG_LLM_OUTPUT === "true") {
-      const dumpPath = `/tmp/llm-parse-error-${Date.now()}.txt`;
-      writeFileSync(dumpPath, `=== RAW ===\n${raw}\n\n=== TRIMMED ===\n${trimmed}\n`);
-      console.error(`[extraction] JSON.parse failed. Dumped to ${dumpPath}`);
-    }
     throw err;
+  }
+
+  // Check if the model signalled that the input is not a math exercise
+  if (
+    parsed !== null &&
+    typeof parsed === "object" &&
+    !Array.isArray(parsed) &&
+    (parsed as Record<string, unknown>).error === "not_math_exercise"
+  ) {
+    const msg = (parsed as Record<string, unknown>).message;
+    throw new Error(
+      `not_math_exercise: ${typeof msg === "string" ? msg : "The uploaded document does not appear to contain math exercises."}`
+    );
   }
   const result = exerciseSetSchema.parse(parsed) as ExerciseSet;
 

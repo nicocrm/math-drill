@@ -3,23 +3,12 @@ import { verifyExplanations } from "./verifyExplanations";
 import type { ExerciseSet } from "../types/exercise";
 
 const mockOpenAICreate = vi.fn();
-const mockAnthropicCreate = vi.fn();
 
 vi.mock("openai", () => ({
   default: vi.fn().mockImplementation(function () {
     return {
       responses: {
         create: mockOpenAICreate,
-      },
-    };
-  }),
-}));
-
-vi.mock("@anthropic-ai/sdk", () => ({
-  default: vi.fn().mockImplementation(function () {
-    return {
-      messages: {
-        create: mockAnthropicCreate,
       },
     };
   }),
@@ -81,24 +70,17 @@ const exerciseWithoutExplanations: ExerciseSet = {
 
 describe("verifyExplanations", () => {
   const originalVerify = process.env.VERIFY_EXPLANATIONS;
-  const originalProvider = process.env.EXTRACTION_PROVIDER;
 
   beforeEach(() => {
     process.env.VERIFY_EXPLANATIONS = "true";
-    process.env.EXTRACTION_PROVIDER = "openai";
     mockOpenAICreate.mockReset();
     mockOpenAICreate.mockResolvedValue({
       output_text: '[{"questionId":"q1","valid":true}]',
-    });
-    mockAnthropicCreate.mockReset();
-    mockAnthropicCreate.mockResolvedValue({
-      content: [{ type: "text", text: '[{"questionId":"q1","valid":true}]' }],
     });
   });
 
   afterEach(() => {
     process.env.VERIFY_EXPLANATIONS = originalVerify;
-    process.env.EXTRACTION_PROVIDER = originalProvider;
   });
 
   it("returns exercise unchanged when VERIFY_EXPLANATIONS=false", async () => {
@@ -167,16 +149,5 @@ describe("verifyExplanations", () => {
     });
     const result = await verifyExplanations(exerciseWithExplanation);
     expect(result.questions[0].explanation).toBe("Addition combines two numbers.");
-  });
-
-  it("uses Anthropic when EXTRACTION_PROVIDER=anthropic", async () => {
-    process.env.EXTRACTION_PROVIDER = "anthropic";
-    mockAnthropicCreate.mockResolvedValueOnce({
-      content: [{ type: "text", text: '[{"questionId":"q1","valid":true}]' }],
-    });
-    const result = await verifyExplanations(exerciseWithExplanation);
-    expect(result.questions[0].explanation).toBe("Addition combines two numbers.");
-    expect(mockAnthropicCreate).toHaveBeenCalled();
-    expect(mockOpenAICreate).not.toHaveBeenCalled();
   });
 });

@@ -1,15 +1,5 @@
 import OpenAI from "openai";
-import Anthropic from "@anthropic-ai/sdk";
 import type { ExerciseSet, Question } from "../types/exercise";
-
-export type ExtractionProvider = "anthropic" | "openai";
-
-function getProvider(): ExtractionProvider {
-  const env = process.env.EXTRACTION_PROVIDER?.toLowerCase();
-  if (env === "openai") return "openai";
-  if (env === "anthropic") return "anthropic";
-  return "anthropic";
-}
 
 function shouldVerify(): boolean {
   const env = process.env.VERIFY_EXPLANATIONS?.toLowerCase();
@@ -89,30 +79,6 @@ async function verifyWithOpenAI(items: VerificationItem[]): Promise<Verification
   return parseVerificationResponse(outputText);
 }
 
-async function verifyWithAnthropic(items: VerificationItem[]): Promise<VerificationResult[]> {
-  const client = new Anthropic();
-  const payload = buildVerificationPayload(items);
-
-  const response = await client.messages.create({
-    model: "claude-sonnet-4-20250514",
-    max_tokens: 2048,
-    system: VERIFICATION_SYSTEM_PROMPT,
-    messages: [
-      {
-        role: "user",
-        content: `Verify these explanations:\n\n${payload}\n\nReturn a JSON array of { questionId, valid, issues? } for each item.`,
-      },
-    ],
-  });
-
-  const textBlock = response.content.find((b) => b.type === "text");
-  if (!textBlock || textBlock.type !== "text") {
-    throw new Error("Anthropic did not return text content");
-  }
-
-  return parseVerificationResponse(textBlock.text);
-}
-
 export async function verifyExplanations(exerciseSet: ExerciseSet): Promise<ExerciseSet> {
   if (!shouldVerify()) {
     return exerciseSet;
@@ -137,8 +103,7 @@ export async function verifyExplanations(exerciseSet: ExerciseSet): Promise<Exer
 
   let results: VerificationResult[];
   try {
-    const provider = getProvider();
-    results = provider === "openai" ? await verifyWithOpenAI(items) : await verifyWithAnthropic(items);
+    results = await verifyWithOpenAI(items);
   } catch {
     // On API failure: strip all explanations for safety
     return {

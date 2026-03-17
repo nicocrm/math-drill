@@ -80,34 +80,17 @@ export async function handle(
     const auth = await verifyAuth(req);
     requireAuth(auth);
 
-    // Parse multipart or base64-encoded body
-    const contentType = event.headers?.["content-type"] ?? event.headers?.["Content-Type"] ?? "";
-
-    if (!contentType.includes("application/pdf") && !contentType.includes("multipart/form-data")) {
-      // Accept raw PDF body (base64 encoded by Scaleway) or JSON with base64 field
-      if (!event.body) {
-        return jsonResponse(400, { error: "Missing request body" });
-      }
+    if (!event.body) {
+      return jsonResponse(400, { error: "Missing request body" });
     }
 
-    let pdfBuffer: Buffer;
-    let filename = "document.pdf";
-
-    if (contentType.includes("application/json")) {
-      // JSON body: { pdf: "<base64>", filename: "..." }
-      const body = JSON.parse(event.body);
-      if (!body.pdf) {
-        return jsonResponse(400, { error: "Missing pdf field" });
-      }
-      pdfBuffer = Buffer.from(body.pdf, "base64");
-      filename = body.filename ?? filename;
-    } else {
-      // Raw PDF body (base64 encoded by Scaleway gateway)
-      pdfBuffer = event.isBase64Encoded
-        ? Buffer.from(event.body, "base64")
-        : Buffer.from(event.body);
-      filename = event.queryStringParameters?.filename ?? filename;
+    const body = JSON.parse(event.body);
+    if (!body.pdf) {
+      return jsonResponse(400, { error: "Missing pdf field" });
     }
+
+    const pdfBuffer = Buffer.from(body.pdf, "base64");
+    const filename: string = body.filename ?? "document.pdf";
 
     const jobId = uuidv4();
     const exerciseId = uuidv4();

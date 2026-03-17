@@ -21,12 +21,12 @@ export function DropZone({ onJobStarted }: DropZoneProps) {
       setError(null);
       try {
         const token = await getToken();
-        const formData = new FormData();
-        formData.append("file", file);
+        const bytes = await file.bytes();
+        const base64 = bytes.toBase64();
         const res = await fetch(postIngestUrl(), {
           method: "POST",
-          headers: authHeaders(token),
-          body: formData,
+          headers: { ...authHeaders(token), "Content-Type": "application/json" },
+          body: JSON.stringify({ pdf: base64, filename: file.name }),
         });
         if (!res.ok) {
           let message = "Upload failed";
