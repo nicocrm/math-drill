@@ -6,6 +6,7 @@ interface IngestionStatusProps {
   jobId: string;
   initialStatus?: { status: string; progress: number };
   onComplete?: () => void;
+  onError?: () => void;
 }
 
 interface StatusData {
@@ -16,7 +17,7 @@ interface StatusData {
   error?: string;
 }
 
-export function IngestionStatus({ jobId, initialStatus, onComplete }: IngestionStatusProps) {
+export function IngestionStatus({ jobId, initialStatus, onComplete, onError }: IngestionStatusProps) {
   const navigate = useNavigate();
   const [status, setStatus] = useState<StatusData | null>(initialStatus ?? null);
   const [pollError, setPollError] = useState<string | null>(null);
@@ -39,6 +40,7 @@ export function IngestionStatus({ jobId, initialStatus, onComplete }: IngestionS
             /* use default */
           }
           setPollError(msg);
+          onError?.();
           return true;
         }
         const data = (await res.json()) as StatusData;
@@ -49,11 +51,13 @@ export function IngestionStatus({ jobId, initialStatus, onComplete }: IngestionS
           return true;
         }
         if (data.status === "error") {
+          onError?.();
           return true;
         }
       } catch (e) {
         const msg = e instanceof Error ? e.message : "Failed to check status";
         setPollError(msg);
+        onError?.();
         return true;
       }
       return false;
@@ -67,7 +71,7 @@ export function IngestionStatus({ jobId, initialStatus, onComplete }: IngestionS
     poll();
 
     return () => clearInterval(interval);
-  }, [jobId, navigate, onComplete]);
+  }, [jobId, navigate, onComplete, onError]);
 
   if (pollError) {
     return (
@@ -114,11 +118,27 @@ export function IngestionStatus({ jobId, initialStatus, onComplete }: IngestionS
     );
   }
 
+  const pct = Math.round(status.progress ?? 0);
+
   return (
-    <div className="rounded-xl border border-zinc-200 bg-muted/50 px-4 py-3 text-sm text-muted-foreground dark:border-zinc-700">
-      <p className="font-medium capitalize">{status.status}</p>
+    <div className="rounded-xl border border-primary/50 bg-primary/10 px-4 py-3 text-base text-foreground dark:border-primary/30">
+      <p className="flex items-center gap-2 font-medium capitalize">
+        <svg className="h-4 w-4 animate-spin text-primary" viewBox="0 0 24 24" fill="none">
+          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
+        </svg>
+        {status.status}
+      </p>
       {status.progress !== undefined && (
-        <p>Progress: {Math.round(status.progress)}%</p>
+        <div className="mt-2 flex items-center gap-3">
+          <div className="h-2 flex-1 overflow-hidden rounded-full bg-primary/20">
+            <div
+              className="h-full rounded-full bg-primary transition-all duration-500 ease-out"
+              style={{ width: `${pct}%` }}
+            />
+          </div>
+          <span className="text-sm font-medium text-muted-foreground">{pct}%</span>
+        </div>
       )}
     </div>
   );

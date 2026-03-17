@@ -50,19 +50,45 @@ export function AdminUpload() {
     }
   }
 
+  const isProcessing = jobId !== null;
+
+  const handleComplete = useCallback(() => {
+    setJobId(null);
+    setInitialJobStatus(null);
+    fetchExercises();
+  }, [fetchExercises]);
+
+  const handleError = useCallback(() => {
+    setJobId(null);
+    setInitialJobStatus(null);
+  }, []);
+
+  // Warn before navigating away during processing
+  useEffect(() => {
+    if (!isProcessing) return;
+    const handler = (e: BeforeUnloadEvent) => {
+      e.preventDefault();
+    };
+    window.addEventListener("beforeunload", handler);
+    return () => window.removeEventListener("beforeunload", handler);
+  }, [isProcessing]);
+
   return (
     <div className="flex flex-col gap-6">
-      <DropZone
-        onJobStarted={(data: JobStartedData) => {
-          setJobId(data.jobId);
-          setInitialJobStatus({ status: data.status, progress: data.progress });
-        }}
-      />
+      {!isProcessing && (
+        <DropZone
+          onJobStarted={(data: JobStartedData) => {
+            setJobId(data.jobId);
+            setInitialJobStatus({ status: data.status, progress: data.progress });
+          }}
+        />
+      )}
       {jobId && (
         <IngestionStatus
           jobId={jobId}
           initialStatus={initialJobStatus ?? undefined}
-          onComplete={fetchExercises}
+          onComplete={handleComplete}
+          onError={handleError}
         />
       )}
 
@@ -96,9 +122,24 @@ export function AdminUpload() {
         </div>
       )}
 
-      <Button href="/" variant="outline" size="md">
-        Back to Home
-      </Button>
+      {isProcessing ? (
+        <Button
+          variant="outline"
+          size="md"
+          onClick={() => {
+            if (window.confirm("Processing in progress. Leave?")) {
+              window.location.href = "/";
+            }
+          }}
+          className="opacity-50"
+        >
+          Back to Home
+        </Button>
+      ) : (
+        <Button href="/" variant="outline" size="md">
+          Back to Home
+        </Button>
+      )}
     </div>
   );
 }
