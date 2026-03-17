@@ -24,7 +24,7 @@ const questionSchema = z.object({
   answerLatex: z.string().nullish(),
   requiresSteps: z.boolean(),
   requiresExample: z.boolean().nullish(),
-  hint: z.string().optional(),
+  hint: z.string().nullish().transform(v => v ?? undefined),
   explanation: z.string().optional(),
 });
 
