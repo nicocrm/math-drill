@@ -4,6 +4,7 @@ import { getIngestStatusUrl } from "@/lib/api";
 
 interface IngestionStatusProps {
   jobId: string;
+  initialStatus?: { status: string; progress: number };
   onComplete?: () => void;
 }
 
@@ -15,15 +16,15 @@ interface StatusData {
   error?: string;
 }
 
-export function IngestionStatus({ jobId, onComplete }: IngestionStatusProps) {
+export function IngestionStatus({ jobId, initialStatus, onComplete }: IngestionStatusProps) {
   const navigate = useNavigate();
-  const [status, setStatus] = useState<StatusData | null>(null);
+  const [status, setStatus] = useState<StatusData | null>(initialStatus ?? null);
   const [pollError, setPollError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!jobId) return;
 
-    setStatus(null);
+    setStatus(initialStatus ?? null);
     setPollError(null);
 
     const poll = async () => {

@@ -3,6 +3,7 @@ import { useAuth } from "@clerk/react";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { DropZone } from "@/components/DropZone";
+import type { JobStartedData } from "@/components/DropZone";
 import { IngestionStatus } from "@/components/IngestionStatus";
 import { getExercisesUrl, deleteExerciseUrl, authHeaders } from "@/lib/api";
 import type { ExerciseSet } from "@/types/exercise";
@@ -10,6 +11,7 @@ import type { ExerciseSet } from "@/types/exercise";
 export function AdminUpload() {
   const { getToken } = useAuth();
   const [jobId, setJobId] = useState<string | null>(null);
+  const [initialJobStatus, setInitialJobStatus] = useState<{ status: string; progress: number } | null>(null);
   const [exercises, setExercises] = useState<ExerciseSet[]>([]);
   const [deleting, setDeleting] = useState<string | null>(null);
 
@@ -51,11 +53,15 @@ export function AdminUpload() {
   return (
     <div className="flex flex-col gap-6">
       <DropZone
-        onJobStarted={(id) => setJobId(id)}
+        onJobStarted={(data: JobStartedData) => {
+          setJobId(data.jobId);
+          setInitialJobStatus({ status: data.status, progress: data.progress });
+        }}
       />
       {jobId && (
         <IngestionStatus
           jobId={jobId}
+          initialStatus={initialJobStatus ?? undefined}
           onComplete={fetchExercises}
         />
       )}

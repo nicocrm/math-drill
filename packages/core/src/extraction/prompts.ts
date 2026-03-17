@@ -1,4 +1,5 @@
 import { create, all } from "mathjs";
+import { writeFileSync } from "fs";
 import type { ExerciseSet } from "../types/exercise";
 import { exerciseSetSchema } from "../exerciseSchema";
 
@@ -115,18 +116,28 @@ export function validateAnswerMath(question: {
 export function parseAndValidateExerciseSet(raw: string): ExerciseSet {
   // Structured output from OpenAI is guaranteed to be valid JSON.
   let parsed: unknown;
+  if (process.env.DEBUG_LLM_OUTPUT === "true") {
+    const dumpPath = `/tmp/llm-parse-error-${Date.now()}.txt`;
+    writeFileSync(dumpPath, `=== RAW ===\n${raw}\n`);
+  }
   try {
     parsed = JSON.parse(raw);
   } catch (err) {
+    console.error(`[extraction] JSON.parse failed.`);
     throw err;
   }
 
-  // Check if the model signalled that the input is not a math exercise
+  // Check if the model signalled that the input is not a math exercise.
+  // Only treat it as an error when there are no questions — the model sometimes
+  // sets the error field even when it successfully extracted exercises (due to
+  // the JSON schema requiring the field to always be present).
   if (
     parsed !== null &&
     typeof parsed === "object" &&
     !Array.isArray(parsed) &&
-    (parsed as Record<string, unknown>).error === "not_math_exercise"
+    (parsed as Record<string, unknown>).error === "not_math_exercise" &&
+    (!Array.isArray((parsed as Record<string, unknown>).questions) ||
+      ((parsed as Record<string, unknown>).questions as unknown[]).length === 0)
   ) {
     const msg = (parsed as Record<string, unknown>).message;
     throw new Error(

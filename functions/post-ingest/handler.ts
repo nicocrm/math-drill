@@ -112,7 +112,7 @@ export async function handle(
       userId: auth.userId,
     });
 
-    return jsonResponse(200, { jobId });
+    return jsonResponse(200, { jobId, status: "pending", progress: 0 });
   } catch (err) {
     if (err instanceof HttpError) {
       return jsonResponse(err.statusCode, { error: err.message });

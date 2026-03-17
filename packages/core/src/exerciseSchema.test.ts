@@ -1,71 +1,72 @@
 import { describe, it, expect } from "vitest";
-import { exerciseSetSchema } from "./exerciseSchema";
+import { llmResponseSchema } from "./exerciseSchema";
 
-const minimalExerciseSet = {
-  id: "test-1",
+const validResponse = {
+  error: null,
+  message: null,
+  id: "ex-001",
   filename: "test.pdf",
-  title: "Test",
-  subject: "Math",
-  createdAt: "2025-03-09T12:00:00.000Z",
+  title: "Math Quiz",
+  subject: "math",
+  createdAt: "2026-03-17",
   sections: [{ id: "s1", label: "Section 1", maxPoints: 10 }],
   questions: [
     {
       id: "q1",
-      type: "numeric",
+      type: "numeric" as const,
       section: "s1",
-      points: 2,
-      prompt: "What is 2 + 2?",
+      points: 5,
+      prompt: "What is 2+2?",
+      choices: null,
       answerMath: "4",
+      answerLatex: "4",
       requiresSteps: false,
+      requiresExample: null,
+      hint: null,
+      explanation: "2+2=4",
     },
   ],
 };
 
-describe("exerciseSetSchema - explanation field", () => {
-  it("accepts question with explanation", () => {
-    const result = exerciseSetSchema.parse({
-      ...minimalExerciseSet,
+describe("llmResponseSchema", () => {
+  it("parses a valid exercise set response", () => {
+    const result = llmResponseSchema.parse(validResponse);
+    expect(result.questions).toHaveLength(1);
+    expect(result.error).toBeNull();
+  });
+
+  it("parses an error response", () => {
+    const result = llmResponseSchema.parse({
+      ...validResponse,
+      error: "not_math_exercise",
+      message: "This PDF is not a math exercise",
+      questions: [],
+    });
+    expect(result.error).toBe("not_math_exercise");
+  });
+
+  it("handles nullable fields correctly", () => {
+    const result = llmResponseSchema.parse(validResponse);
+    expect(result.questions[0].choices).toBeNull();
+    expect(result.questions[0].hint).toBeNull();
+    expect(result.questions[0].requiresExample).toBeNull();
+  });
+
+  it("parses questions with choices", () => {
+    const result = llmResponseSchema.parse({
+      ...validResponse,
       questions: [
         {
-          ...minimalExerciseSet.questions[0],
-          explanation: "To add fractions, find a common denominator.",
+          ...validResponse.questions[0],
+          type: "multiple_choice",
+          choices: [
+            { id: "a", latex: "3" },
+            { id: "b", latex: "4" },
+          ],
+          answerMath: ["b"],
         },
       ],
     });
-    expect(result.questions[0].explanation).toBe(
-      "To add fractions, find a common denominator."
-    );
-  });
-
-  it("accepts question without explanation", () => {
-    const result = exerciseSetSchema.parse(minimalExerciseSet);
-    expect(result.questions[0].explanation).toBeUndefined();
-  });
-
-  it("accepts empty string explanation", () => {
-    const result = exerciseSetSchema.parse({
-      ...minimalExerciseSet,
-      questions: [
-        {
-          ...minimalExerciseSet.questions[0],
-          explanation: "",
-        },
-      ],
-    });
-    expect(result.questions[0].explanation).toBe("");
-  });
-
-  it("rejects non-string explanation", () => {
-    expect(() =>
-      exerciseSetSchema.parse({
-        ...minimalExerciseSet,
-        questions: [
-          {
-            ...minimalExerciseSet.questions[0],
-            explanation: 123,
-          },
-        ],
-      })
-    ).toThrow();
+    expect(result.questions[0].choices).toHaveLength(2);
   });
 });

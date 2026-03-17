@@ -19,11 +19,11 @@ const questionSchema = z.object({
   section: z.string(),
   points: z.number(),
   prompt: z.string(),
-  choices: z.array(choiceSchema).optional(),
-  answerMath: z.union([z.string(), z.array(z.string()), z.null()]),
-  answerLatex: z.string().optional(),
+  choices: z.array(choiceSchema).nullish().transform(v => v ?? undefined),
+  answerMath: z.union([z.string(), z.array(z.string()), z.null()]).transform(v => (v === "" ? null : v)),
+  answerLatex: z.string().nullish(),
   requiresSteps: z.boolean(),
-  requiresExample: z.boolean().optional(),
+  requiresExample: z.boolean().nullish(),
   hint: z.string().optional(),
   explanation: z.string().optional(),
 });
@@ -45,3 +45,34 @@ export const exerciseSetSchema = z.object({
 });
 
 export type ExerciseSetSchema = z.infer<typeof exerciseSetSchema>;
+
+/**
+ * LLM-facing schemas: all fields required + nullable (no .optional/.nullish)
+ * as required by OpenAI structured outputs / zodResponseFormat.
+ */
+const llmQuestionSchema = z.object({
+  id: z.string(),
+  type: questionTypeSchema,
+  section: z.string(),
+  points: z.number(),
+  prompt: z.string(),
+  choices: z.array(choiceSchema).nullable(),
+  answerMath: z.union([z.string(), z.array(z.string()), z.null()]),
+  answerLatex: z.string().nullable(),
+  requiresSteps: z.boolean(),
+  requiresExample: z.boolean().nullable(),
+  hint: z.string().nullable(),
+  explanation: z.string().nullable(),
+});
+
+export const llmResponseSchema = z.object({
+  error: z.string().nullable(),
+  message: z.string().nullable(),
+  id: z.string(),
+  filename: z.string(),
+  title: z.string(),
+  subject: z.string(),
+  createdAt: z.string(),
+  sections: z.array(sectionSchema),
+  questions: z.array(llmQuestionSchema),
+});

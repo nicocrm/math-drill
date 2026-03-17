@@ -4,8 +4,14 @@ import { useDropzone } from "react-dropzone";
 import { Card } from "@/components/ui/Card";
 import { postIngestUrl, authHeaders } from "@/lib/api";
 
+export interface JobStartedData {
+  jobId: string;
+  status: string;
+  progress: number;
+}
+
 interface DropZoneProps {
-  onJobStarted?: (jobId: string) => void;
+  onJobStarted?: (data: JobStartedData) => void;
 }
 
 export function DropZone({ onJobStarted }: DropZoneProps) {
@@ -38,9 +44,9 @@ export function DropZone({ onJobStarted }: DropZoneProps) {
           }
           throw new Error(message);
         }
-        const data = (await res.json()) as { jobId: string };
+        const data = (await res.json()) as { jobId: string; status: string; progress: number };
         if (data.jobId) {
-          onJobStarted?.(data.jobId);
+          onJobStarted?.({ jobId: data.jobId, status: data.status ?? "pending", progress: data.progress ?? 0 });
         }
       } catch (e) {
         const msg = e instanceof Error ? e.message : "Upload failed";
