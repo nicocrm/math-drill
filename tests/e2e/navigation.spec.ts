@@ -4,12 +4,15 @@ test.describe("Navigation", () => {
   test("home links to admin", async ({ page }) => {
     await page.goto("/");
     await page.getByRole("link", { name: /go to upload/i }).click();
-    await expect(page).toHaveURL(/\/admin/);
+    await expect(page).toHaveURL(/#\/admin/);
   });
 
   test("admin has link back to home", async ({ page }) => {
-    await page.goto("/admin");
+    await page.goto("/#/admin");
     await page.getByRole("link", { name: /back to home/i }).click();
-    await expect(page).toHaveURL("/");
+    await expect(page).not.toHaveURL(/#\/admin/);
+    await expect(
+      page.getByRole("heading", { name: "MathDrill" })
+    ).toBeVisible();
   });
 });

@@ -3,19 +3,18 @@ import path from "path";
 import type { JobState, IngestStep, JobStatusStore } from "../jobStatus";
 import { STEP_PROGRESS } from "../jobStatus";
 
-export interface FileJobStatusStoreOptions {
+export interface LocalFsJobStatusStoreOptions {
   dir?: string;
 }
 
 /**
- * File-based job status store for local dev.
- * Writes status/{jobId}.json so dev-server and dev-worker (separate processes)
- * share the same status via the filesystem.
+ * Local filesystem job status (shared by API and worker on one machine in dev
+ * when STORAGE is not s3). Production with STORAGE=s3 uses S3JobStatusStore.
  */
-export class FileJobStatusStore implements JobStatusStore {
+export class LocalFsJobStatusStore implements JobStatusStore {
   private dir: string;
 
-  constructor(opts: FileJobStatusStoreOptions = {}) {
+  constructor(opts: LocalFsJobStatusStoreOptions = {}) {
     this.dir =
       opts.dir ??
       process.env.STATUS_DIR ??

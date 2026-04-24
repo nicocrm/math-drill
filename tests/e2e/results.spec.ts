@@ -49,7 +49,7 @@ test.describe("Results", () => {
   test("results page shows Session not found when no session", async ({
     page,
   }) => {
-    await page.goto("/results?id=nonexistent-session");
+    await page.goto("/#/results?id=nonexistent-session");
     await expect(
       page.getByRole("heading", { name: "Results" })
     ).toBeVisible();
@@ -69,7 +69,7 @@ test.describe("Results", () => {
       localStorage.setItem(`session-${session.id}`, JSON.stringify(session));
     }, mockSession);
 
-    await page.goto(`/results?id=${mockSession.id}`);
+    await page.goto(`/#/results?id=${mockSession.id}`);
     await expect(
       page.getByRole("heading", { name: "Results" })
     ).toBeVisible();

@@ -1,15 +1,10 @@
 import { defineConfig, devices } from "@playwright/test";
-import * as os from "os";
-import * as path from "path";
 
 const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3002;
 const API_PORT = process.env.API_PORT ?? "3003";
 
-// Use temp dirs for e2e so home/navigation tests see empty state (no exercises)
-const E2E_EXERCISES_DIR = path.join(os.tmpdir(), "math-drill-e2e-exercises");
-const E2E_INTAKE_DIR = path.join(os.tmpdir(), "math-drill-e2e-intake");
-
 export default defineConfig({
+  globalTeardown: "./tests/e2e/global-teardown.ts",
   testDir: "./tests/e2e",
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
@@ -22,15 +17,13 @@ export default defineConfig({
   },
   projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"] } }],
   webServer: {
-    command: `concurrently -n ui,api "vite --port ${PORT}" "npx tsx functions/dev-server.ts"`,
+    command: `npx tsx tests/e2e/ensure-e2e-storage.ts && npx concurrently -k "npx tsx server/api.ts" "npx tsx server/worker.ts" "sleep 2 && npx vite --port ${PORT}"`,
     url: `http://localhost:${PORT}`,
-    reuseExistingServer: !process.env.CI,
+    reuseExistingServer: false,
     env: {
       ...process.env,
-      EXERCISES_DIR: E2E_EXERCISES_DIR,
-      INTAKE_DIR: E2E_INTAKE_DIR,
       API_PORT,
-      VITE_API_URL: "",
+      REDIS_URL: process.env.REDIS_URL || "redis://127.0.0.1:6379",
     },
   },
 });

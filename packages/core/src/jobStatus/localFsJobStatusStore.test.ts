@@ -2,16 +2,16 @@ import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import { mkdtemp, rm } from "fs/promises";
 import path from "path";
 import os from "os";
-import { FileJobStatusStore } from "./fileJobStatusStore";
+import { LocalFsJobStatusStore } from "./localFsJobStatusStore";
 import type { JobState } from "../jobStatus";
 
-describe("FileJobStatusStore", () => {
-  let store: FileJobStatusStore;
+describe("LocalFsJobStatusStore", () => {
+  let store: LocalFsJobStatusStore;
   let tmpDir: string;
 
   beforeEach(async () => {
     tmpDir = await mkdtemp(path.join(os.tmpdir(), "job-status-"));
-    store = new FileJobStatusStore({ dir: tmpDir });
+    store = new LocalFsJobStatusStore({ dir: tmpDir });
   });
 
   afterEach(async () => {
