@@ -38,6 +38,9 @@ terraform/terraform.tfvars
 # vercel
 .vercel
 
+# Playwright e2e handoff (see tests/e2e/global-setup.ts)
+.e2e-storage-dir
+
 # server-side storage
 /exercises/
 /intake/

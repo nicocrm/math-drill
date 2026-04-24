@@ -1,3 +1,11 @@
-# Local dev uses HTTP-triggered worker (INGEST_WORKER_URL) instead of a message queue.
-# Run: npm run dev:worker (in one terminal) and npm run dev (in another).
-# No Docker services required for local development.
+services:
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 3

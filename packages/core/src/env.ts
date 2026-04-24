@@ -1,11 +1,11 @@
-import { S3ExerciseStorage } from "@math-drill/core/storage/s3ExerciseStorage";
-import { S3FileStorage } from "@math-drill/core/storage/s3FileStorage";
-import { LocalExerciseStorage } from "@math-drill/core/storage/localExerciseStorage";
-import { LocalFileStorage } from "@math-drill/core/storage/localFileStorage";
-import { S3JobStatusStore } from "@math-drill/core/jobStatus/s3JobStatusStore";
-import { FileJobStatusStore } from "@math-drill/core/jobStatus/fileJobStatusStore";
-import type { ExerciseStorage, FileStorage } from "@math-drill/core";
-import type { JobStatusStore } from "@math-drill/core";
+import { S3ExerciseStorage } from "./storage/s3ExerciseStorage";
+import { S3FileStorage } from "./storage/s3FileStorage";
+import { LocalExerciseStorage } from "./storage/localExerciseStorage";
+import { LocalFileStorage } from "./storage/localFileStorage";
+import { S3JobStatusStore } from "./jobStatus/s3JobStatusStore";
+import { LocalFsJobStatusStore } from "./jobStatus/localFsJobStatusStore";
+import type { ExerciseStorage, FileStorage } from "./storage";
+import type { JobStatusStore } from "./jobStatus";
 
 let exerciseStorage: ExerciseStorage | null = null;
 let fileStorage: FileStorage | null = null;
@@ -53,7 +53,7 @@ export function getJobStatusStore(): JobStatusStore {
       prefix: "status",
     });
   } else {
-    jobStatusStore = new FileJobStatusStore();
+    jobStatusStore = new LocalFsJobStatusStore();
   }
   return jobStatusStore;
 }

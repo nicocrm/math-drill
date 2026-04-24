@@ -1,27 +1,25 @@
 import { describe, it, expect, vi, beforeAll, afterAll } from "vitest";
-import { handleIngest, type IngestPayload } from "./handler";
-import { MemoryJobStatusStore } from "@math-drill/core/jobStatus/memoryJobStatusStore";
-import { LocalExerciseStorage } from "@math-drill/core/storage/localExerciseStorage";
-import { LocalFileStorage } from "@math-drill/core/storage/localFileStorage";
+import { handleIngest, type IngestPayload } from "./handleIngest";
+import { MemoryJobStatusStore } from "../jobStatus/memoryJobStatusStore";
+import { LocalExerciseStorage } from "../storage/localExerciseStorage";
+import { LocalFileStorage } from "../storage/localFileStorage";
 import { mkdtemp, rm, writeFile } from "fs/promises";
 import { join } from "path";
 import { tmpdir } from "os";
 
-// Mock the env module to inject test storage instances
 const mockJobStore = new MemoryJobStatusStore();
 let testExerciseDir: string;
 let testIntakeDir: string;
 let mockExerciseStorage: LocalExerciseStorage;
 let mockFileStorage: LocalFileStorage;
 
-vi.mock("../lib/env", () => ({
+vi.mock("../env", () => ({
   getJobStatusStore: () => mockJobStore,
   getExerciseStorage: () => mockExerciseStorage,
   getFileStorage: () => mockFileStorage,
 }));
 
-// Mock the PDF extraction to avoid calling AI APIs
-vi.mock("@math-drill/core/generateExercisesFromPdf", () => ({
+vi.mock("../generateExercisesFromPdf", () => ({
   generateExercisesFromPdf: vi.fn().mockResolvedValue({
     id: "will-be-overwritten",
     filename: "test.pdf",
@@ -43,7 +41,7 @@ vi.mock("@math-drill/core/generateExercisesFromPdf", () => ({
   }),
 }));
 
-describe("ingest-worker handler", () => {
+describe("handleIngest", () => {
   beforeAll(async () => {
     testExerciseDir = await mkdtemp(join(tmpdir(), "exercises-"));
     testIntakeDir = await mkdtemp(join(tmpdir(), "intake-"));
@@ -57,7 +55,6 @@ describe("ingest-worker handler", () => {
   });
 
   it("processes an ingest job end-to-end", async () => {
-    // Stage a fake PDF in file storage
     const s3Key = "test-job-doc.pdf";
     await writeFile(join(testIntakeDir, s3Key), Buffer.from("fake-pdf-content"));
 
@@ -69,12 +66,10 @@ describe("ingest-worker handler", () => {
       userId: "user-789",
     };
 
-    // Set initial job state
     await mockJobStore.set(payload.jobId, { status: "pending", progress: 0 });
 
     await handleIngest(payload);
 
-    // Verify job status progressed to done
     const finalJob = await mockJobStore.get(payload.jobId);
     expect(finalJob).toBeDefined();
     expect(finalJob!.status).toBe("done");
@@ -82,7 +77,6 @@ describe("ingest-worker handler", () => {
     expect(finalJob!.exerciseId).toBe("ex-456");
     expect(finalJob!.questionCount).toBe(1);
 
-    // Verify exercise was saved
     const exercise = await mockExerciseStorage.get("ex-456");
     expect(exercise).toBeDefined();
     expect(exercise!.id).toBe("ex-456");
@@ -109,4 +103,3 @@ describe("ingest-worker handler", () => {
     expect(finalJob!.error).toBeDefined();
   });
 });
-
