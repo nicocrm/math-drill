@@ -2,6 +2,7 @@ import { create, all } from "mathjs";
 import { writeFileSync } from "fs";
 import type { ExerciseSet } from "../types/exercise";
 import { exerciseSetSchema } from "../exerciseSchema";
+import { crossCheckAnswers } from "./crossCheckAnswers";
 
 const math = create(all);
 
@@ -88,20 +89,8 @@ export function validateAnswerMath(question: {
           `Question ${question.id}: multiple_choice choice "${missingFlag.id}" is missing the required correct flag`
         );
       }
-      // Phase 1: ids from correct flags must match answerMath
-      const flaggedCorrectIds = question.choices
-        .filter((c) => c.correct === true)
-        .map((c) => c.id)
-        .sort();
-      const answerMathIds = [...arr].sort();
-      if (
-        flaggedCorrectIds.length !== answerMathIds.length ||
-        !flaggedCorrectIds.every((id, i) => id === answerMathIds[i])
-      ) {
-        throw new Error(
-          `Question ${question.id}: multiple_choice correct flags (${JSON.stringify(flaggedCorrectIds)}) do not match answerMath (${JSON.stringify(answerMathIds)})`
-        );
-      }
+      // Note: consistency between correct flags and answerMath is checked in Phase 2
+      // (crossCheckAnswers) which demotes rather than rejects.
     }
     return;
   }
@@ -205,6 +194,10 @@ export function parseAndValidateExerciseSet(raw: string): ExerciseSet {
       throw err;
     }
   }
+
+  // Phase 2: cross-check answer fields for internal consistency;
+  // demote contradictory questions to "open" rather than persisting wrong answers.
+  result.questions = crossCheckAnswers(result.questions, result.id);
 
   return result;
 }

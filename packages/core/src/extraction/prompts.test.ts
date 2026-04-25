@@ -107,7 +107,8 @@ describe("validateAnswerMath", () => {
     ).toThrow('choice "a" is missing the required correct flag');
   });
 
-  it("throws for multiple_choice when correct flags don't match answerMath", () => {
+  it("accepts multiple_choice even when correct flags disagree with answerMath (Phase 2 handles demotion)", () => {
+    // Phase 1 only checks that flags are present; Phase 2 cross-checks consistency
     expect(() =>
       validateAnswerMath({
         id: "q1", type: "multiple_choice", answerMath: ["b"],
@@ -117,7 +118,7 @@ describe("validateAnswerMath", () => {
           { id: "c", correct: true },
         ],
       })
-    ).toThrow("do not match answerMath");
+    ).not.toThrow();
   });
 });
 
