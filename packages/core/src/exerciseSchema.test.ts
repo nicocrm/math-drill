@@ -20,6 +20,7 @@ const validResponse = {
       choices: null,
       answerMath: "4",
       answerLatex: "4",
+      canonicalValue: 4,
       requiresSteps: false,
       requiresExample: null,
       hint: null,
@@ -60,10 +61,11 @@ describe("llmResponseSchema", () => {
           ...validResponse.questions[0],
           type: "multiple_choice",
           choices: [
-            { id: "a", latex: "3" },
-            { id: "b", latex: "4" },
+            { id: "a", latex: "3", correct: false },
+            { id: "b", latex: "4", correct: true },
           ],
           answerMath: ["b"],
+          canonicalValue: null,
         },
       ],
     });

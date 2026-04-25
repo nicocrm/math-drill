@@ -29,9 +29,10 @@ Return a single JSON object matching this schema:
     "section": "string (section id)",
     "points": number,
     "prompt": "string (use $...$ for math, e.g. $\\\\frac{1}{2}$)",
-    "choices": [{ "id": "string", "latex": "string (pure LaTeX, no $ delimiters)" }] (only for multiple_choice),
+    "choices": [{ "id": "string", "latex": "string (pure LaTeX, no $ delimiters)", "correct": boolean }] (only for multiple_choice),
     "answerMath": "string | string[] | null",
     "answerLatex": "string (KaTeX for display)",
+    "canonicalValue": number | null,
     "requiresSteps": boolean,
     "requiresExample": boolean (only for true_false, if counterexample needed when false),
     "hint": "string (optional)",
@@ -48,6 +49,10 @@ Rules:
 - answerMath: For true_false use EXACTLY the lowercase strings "true" or "false" (never "vrai", "faux", "True", "False", "yes", "no", etc.).
 - answerMath: For type "open" use null (ungraded).
 - answerLatex: KaTeX string for displaying the correct answer.
+- canonicalValue: For numeric/expression, compute the numeric result of answerMath yourself and record it here as a plain number (e.g. 0.5 for "1/2", 1.4142135623730951 for "sqrt(2)"). This must equal the value of evaluating answerMath. For all other types, set canonicalValue to null.
+- choices[].correct: For multiple_choice, each choice must have correct: true if it is a correct answer, correct: false otherwise. The ids of choices with correct: true MUST exactly match the ids in answerMath. For all other question types, set correct: null on each choice (or omit choices entirely).
+- CONSISTENCY RULE: For numeric/expression questions, answerMath, answerLatex, and canonicalValue must all represent the same number. If you cannot guarantee this (e.g. the answer involves a variable or you are unsure of the numeric value), demote the question to type "open" with answerMath: null and canonicalValue: null instead of risking a wrong graded answer.
+- CONSISTENCY RULE: For multiple_choice questions, the ids in answerMath must exactly match the ids of choices where correct: true. If these would differ, demote to type "open" with answerMath: null.
 - explanation: A brief, factual explanation of the mathematical concept being tested. Use only well-established mathematical facts. Do NOT invent examples, numbers, or derivations not present in the question. Ground the explanation in the concept itself (e.g., fraction simplification, order of operations), not in the specific numbers of this question. Keep it 1–3 sentences.
 - Return ONLY valid JSON, no markdown or extra text.`;
 
@@ -55,6 +60,8 @@ export function validateAnswerMath(question: {
   id: string;
   type: string;
   answerMath: string | string[] | null;
+  choices?: Array<{ id: string; correct?: boolean | null }>;
+  canonicalValue?: number | null;
 }): void {
   if (question.type === "open") {
     if (question.answerMath !== null) {
@@ -70,6 +77,31 @@ export function validateAnswerMath(question: {
       throw new Error(
         `Question ${question.id}: multiple_choice must have answerMath as string[], got: ${JSON.stringify(question.answerMath)}`
       );
+    }
+    // Phase 1: every choice must have an explicit correct flag
+    if (Array.isArray(question.choices) && question.choices.length > 0) {
+      const missingFlag = question.choices.find(
+        (c) => c.correct === null || c.correct === undefined
+      );
+      if (missingFlag) {
+        throw new Error(
+          `Question ${question.id}: multiple_choice choice "${missingFlag.id}" is missing the required correct flag`
+        );
+      }
+      // Phase 1: ids from correct flags must match answerMath
+      const flaggedCorrectIds = question.choices
+        .filter((c) => c.correct === true)
+        .map((c) => c.id)
+        .sort();
+      const answerMathIds = [...arr].sort();
+      if (
+        flaggedCorrectIds.length !== answerMathIds.length ||
+        !flaggedCorrectIds.every((id, i) => id === answerMathIds[i])
+      ) {
+        throw new Error(
+          `Question ${question.id}: multiple_choice correct flags (${JSON.stringify(flaggedCorrectIds)}) do not match answerMath (${JSON.stringify(answerMathIds)})`
+        );
+      }
     }
     return;
   }
@@ -108,6 +140,17 @@ export function validateAnswerMath(question: {
     } catch {
       throw new Error(
         `Question ${question.id}: answerMath "${s}" is not a valid mathjs-evaluable numeric expression`
+      );
+    }
+    // Phase 1: canonicalValue must be present
+    if (question.canonicalValue === null || question.canonicalValue === undefined) {
+      throw new Error(
+        `Question ${question.id}: numeric/expression must have a canonicalValue (expected a number, got: ${JSON.stringify(question.canonicalValue)})`
+      );
+    }
+    if (typeof question.canonicalValue !== "number") {
+      throw new Error(
+        `Question ${question.id}: canonicalValue must be a number, got: ${JSON.stringify(question.canonicalValue)}`
       );
     }
   }
