@@ -71,7 +71,7 @@ export function IngestionStatus({ jobId, initialStatus, onComplete, onError }: I
     poll();
 
     return () => clearInterval(interval);
-  }, [jobId, navigate, onComplete, onError]);
+  }, [jobId, initialStatus, navigate, onComplete, onError]);
 
   if (pollError) {
     return (
