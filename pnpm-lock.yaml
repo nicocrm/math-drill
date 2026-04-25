@@ -64,9 +64,9 @@ importers:
       '@playwright/test':
         specifier: ^1.58.2
         version: 1.58.2
-      '@tailwindcss/postcss':
+      '@tailwindcss/vite':
         specifier: ^4.2.4
-        version: 4.2.4
+        version: 4.2.4(vite@8.0.10(@types/node@25.3.5)(esbuild@0.28.0)(jiti@2.6.1)(tsx@4.21.0))
       '@types/express':
         specifier: ^5.0.0
         version: 5.0.6
@@ -154,10 +154,6 @@ importers:
         version: 4.1.0(@types/node@25.3.5)(vite@8.0.10(@types/node@25.3.5)(esbuild@0.28.0)(jiti@2.6.1)(tsx@4.21.0))
 
 packages:
-
-  '@alloc/quick-lru@5.2.0':
-    resolution: {integrity: sha512-UrcABB+4bUrFABwbluTIBErXwvbsU/V7TZWfmbgJfbkwiBuziS9gxdODUyuiecfdGQ85jglMW6juS3+z5TsKLw==}
-    engines: {node: '>=10'}
 
   '@anthropic-ai/sdk@0.78.0':
     resolution: {integrity: sha512-PzQhR715td/m1UaaN5hHXjYB8Gl2lF9UVhrrGrZeysiF6Rb74Wc9GCB8hzLdzmQtBd1qe89F9OptgB9Za1Ib5w==}
@@ -1204,8 +1200,10 @@ packages:
     resolution: {integrity: sha512-9El/iI069DKDSXwTvB9J4BwdO5JhRrOweGaK25taBAvBXyXqJAX+Jqdvs8r8gKpsI/1m0LeJLyQYTf/WLrBT1Q==}
     engines: {node: '>= 20'}
 
-  '@tailwindcss/postcss@4.2.4':
-    resolution: {integrity: sha512-wgAVj6nUWAolAu8YFvzT2cTBIElWHkjZwFYovF+xsqKsW2ADxM/X2opxj5NsF/qVccAOjRNe8X2IdPzMsWyHTg==}
+  '@tailwindcss/vite@4.2.4':
+    resolution: {integrity: sha512-pCvohwOCspk3ZFn6eJzrrX3g4n2JY73H6MmYC87XfGPyTty4YsCjYTMArRZm/zOI8dIt3+EcrLHAFPe5A4bgtw==}
+    peerDependencies:
+      vite: ^5.2.0 || ^6 || ^7 || ^8
 
   '@tanstack/query-core@5.90.16':
     resolution: {integrity: sha512-MvtWckSVufs/ja463/K4PyJeqT+HMlJWtw6PrCpywznd2NSgO3m4KwO9RqbFqGg6iDE8vVMFWMeQI4Io3eEYww==}
@@ -2598,8 +2596,6 @@ packages:
 
 snapshots:
 
-  '@alloc/quick-lru@5.2.0': {}
-
   '@anthropic-ai/sdk@0.78.0(zod@4.3.6)':
     dependencies:
       json-schema-to-ts: 3.1.1
@@ -3817,13 +3813,12 @@ snapshots:
       '@tailwindcss/oxide-win32-arm64-msvc': 4.2.4
       '@tailwindcss/oxide-win32-x64-msvc': 4.2.4
 
-  '@tailwindcss/postcss@4.2.4':
+  '@tailwindcss/vite@4.2.4(vite@8.0.10(@types/node@25.3.5)(esbuild@0.28.0)(jiti@2.6.1)(tsx@4.21.0))':
     dependencies:
-      '@alloc/quick-lru': 5.2.0
       '@tailwindcss/node': 4.2.4
       '@tailwindcss/oxide': 4.2.4
-      postcss: 8.5.10
       tailwindcss: 4.2.4
+      vite: 8.0.10(@types/node@25.3.5)(esbuild@0.28.0)(jiti@2.6.1)(tsx@4.21.0)
 
   '@tanstack/query-core@5.90.16': {}
 
