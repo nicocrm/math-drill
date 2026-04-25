@@ -1,10 +1,8 @@
-import { create, all } from "mathjs";
 import { writeFileSync } from "fs";
 import type { ExerciseSet } from "../types/exercise";
 import { exerciseSetSchema } from "../exerciseSchema";
 import { crossCheckAnswers } from "./crossCheckAnswers";
-
-const math = create(all);
+import { math } from "./mathInstance";
 
 export const SYSTEM_PROMPT = `You are an expert at creating math exercises. Your task is to GENERATE NEW exercises inspired by a reference PDF—not to copy or extract the exact exercises from it.
 
