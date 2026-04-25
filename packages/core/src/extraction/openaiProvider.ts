@@ -5,7 +5,7 @@ import { llmResponseSchema } from "../exerciseSchema";
 import { SYSTEM_PROMPT, parseAndValidateExerciseSet } from "./prompts";
 import { verifyExplanations } from "./verifyExplanations";
 
-const OPENAI_MODEL = "gpt-4o";
+const OPENAI_MODEL = "gpt-5.4-mini";
 
 export async function generateExercisesFromPdfOpenAI(
   pdfBase64: string,
