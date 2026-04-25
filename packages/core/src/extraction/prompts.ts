@@ -2,7 +2,6 @@ import { writeFileSync } from "fs";
 import type { ExerciseSet } from "../types/exercise";
 import { exerciseSetSchema } from "../exerciseSchema";
 import { crossCheckAnswers } from "./crossCheckAnswers";
-import { math } from "./mathInstance";
 
 export const SYSTEM_PROMPT = `You are an expert at creating math exercises. Your task is to GENERATE NEW exercises inspired by a reference PDF—not to copy or extract the exact exercises from it.
 
@@ -118,16 +117,6 @@ export function validateAnswerMath(question: {
     const s = question.answerMath;
     if (typeof s !== "string") {
       throw new Error(`Question ${question.id}: numeric/expression must have answerMath as string`);
-    }
-    try {
-      const result = math.parse(s.trim()).evaluate();
-      if (typeof result !== "number") {
-        throw new Error("Not numeric");
-      }
-    } catch {
-      throw new Error(
-        `Question ${question.id}: answerMath "${s}" is not a valid mathjs-evaluable numeric expression`
-      );
     }
     // Phase 1: canonicalValue must be present
     if (question.canonicalValue === null || question.canonicalValue === undefined) {
