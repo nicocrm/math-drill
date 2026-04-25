@@ -17,7 +17,7 @@ export default defineConfig({
   },
   projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"] } }],
   webServer: {
-    command: `npx tsx tests/e2e/ensure-e2e-storage.ts && npx concurrently -k "npx tsx server/api.ts" "npx tsx server/worker.ts" "sleep 2 && npx vite --port ${PORT}"`,
+    command: `pnpm exec tsx tests/e2e/ensure-e2e-storage.ts && pnpm exec concurrently -k "pnpm exec tsx server/api.ts" "pnpm exec tsx server/worker.ts" "sleep 2 && pnpm exec vite --port ${PORT}"`,
     url: `http://localhost:${PORT}`,
     reuseExistingServer: false,
     env: {
