@@ -1,7 +1,5 @@
-import { create, all } from "mathjs";
+import { math } from "./mathInstance";
 import type { Question } from "../types/exercise";
-
-const math = create(all);
 
 /** Relative tolerance for numeric comparisons (1 part per million). */
 const REL_TOL = 1e-6;
@@ -127,7 +125,7 @@ function checkNumericExpression(q: Question): CheckResult {
 
   let evaluated: number;
   try {
-    const result = math.parse(s.trim()).evaluate();
+    const result = math.evaluate(s.trim());
     if (typeof result !== "number") {
       return {
         reason: `answerMath "${s}" does not evaluate to a number`,
