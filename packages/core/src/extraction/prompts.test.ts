@@ -61,14 +61,63 @@ describe("validateAnswerMath", () => {
 
   it("accepts valid mathjs string for numeric type", () => {
     expect(() =>
-      validateAnswerMath({ id: "q1", type: "numeric", answerMath: "2/3" })
+      validateAnswerMath({ id: "q1", type: "numeric", answerMath: "2/3", canonicalValue: 2/3 })
     ).not.toThrow();
   });
 
   it("throws for numeric with invalid answerMath", () => {
     expect(() =>
-      validateAnswerMath({ id: "q1", type: "numeric", answerMath: "not a number" })
+      validateAnswerMath({ id: "q1", type: "numeric", answerMath: "not a number", canonicalValue: 0 })
     ).toThrow("not a valid mathjs-evaluable numeric expression");
+  });
+
+  it("throws for numeric without canonicalValue", () => {
+    expect(() =>
+      validateAnswerMath({ id: "q1", type: "numeric", answerMath: "2/3" })
+    ).toThrow("canonicalValue");
+  });
+
+  it("throws for expression without canonicalValue", () => {
+    expect(() =>
+      validateAnswerMath({ id: "q1", type: "expression", answerMath: "sqrt(2)" })
+    ).toThrow("canonicalValue");
+  });
+
+  it("accepts multiple_choice with correct flags matching answerMath", () => {
+    expect(() =>
+      validateAnswerMath({
+        id: "q1", type: "multiple_choice", answerMath: ["b"],
+        choices: [
+          { id: "a", correct: false },
+          { id: "b", correct: true },
+        ],
+      })
+    ).not.toThrow();
+  });
+
+  it("throws for multiple_choice with choice missing correct flag", () => {
+    expect(() =>
+      validateAnswerMath({
+        id: "q1", type: "multiple_choice", answerMath: ["b"],
+        choices: [
+          { id: "a" },
+          { id: "b", correct: true },
+        ],
+      })
+    ).toThrow('choice "a" is missing the required correct flag');
+  });
+
+  it("throws for multiple_choice when correct flags don't match answerMath", () => {
+    expect(() =>
+      validateAnswerMath({
+        id: "q1", type: "multiple_choice", answerMath: ["b"],
+        choices: [
+          { id: "a", correct: false },
+          { id: "b", correct: false },
+          { id: "c", correct: true },
+        ],
+      })
+    ).toThrow("do not match answerMath");
   });
 });
 
@@ -98,6 +147,7 @@ describe("parseAndValidateExerciseSet - LaTeX in valid JSON", () => {
         id: "q1", type: "numeric", section: "s1", points: 1,
         prompt: "What is $\\sqrt{2}$?",
         answerMath: "sqrt(2)", answerLatex: "\\sqrt{2}",
+        canonicalValue: Math.sqrt(2),
         requiresSteps: false,
       }],
     });
@@ -115,6 +165,7 @@ describe("parseAndValidateExerciseSet - LaTeX in valid JSON", () => {
         id: "q1", type: "numeric", section: "s1", points: 1,
         prompt: "Line1\nLine2",
         answerMath: "1", answerLatex: "1",
+        canonicalValue: 1,
         requiresSteps: false,
       }],
     });
@@ -176,6 +227,7 @@ describe("parseAndValidateExerciseSet - not_math_exercise sentinel", () => {
           prompt: "What is $1+1$?",
           answerMath: "2",
           answerLatex: "2",
+          canonicalValue: 2,
           requiresSteps: false,
         },
       ],
