@@ -18,21 +18,22 @@ jobs:
           --health-timeout 5s --health-retries 5
     steps:
       - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
           node-version: "22"
-          cache: "npm"
-      - run: npm ci
-      - run: npm test
+          cache: "pnpm"
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm test
         env:
           REDIS_URL: redis://127.0.0.1:6379
-      - run: npm run test:integration
+      - run: pnpm run test:integration
         env:
           REDIS_URL: redis://127.0.0.1:6379
-      - run: npm run build
+      - run: pnpm run build
         env:
           VITE_CLERK_PUBLISHABLE_KEY: ""
-      - run: npm run build:server
+      - run: pnpm run build:server
 
   docker:
     name: Build container image

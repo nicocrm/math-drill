@@ -40,11 +40,11 @@ Multiple choice, true/false, numeric/fraction, expression, and open (ungraded).
 
 1. Copy `.env.example` to `.env` and configure your API key(s) and optional Clerk keys.
 2. **First-time (Redis for BullMQ):** start Redis and leave it running (e.g. `docker compose up -d`). Local dev and tests expect `REDIS_URL` (default `redis://127.0.0.1:6379` when using Docker as documented).
-3. Install and run:
+3. Install and run (Node 22+; run `corepack enable` once so the `packageManager` field activates the pinned **pnpm**):
 
 ```bash
-npm install
-npm run dev
+pnpm install
+pnpm run dev
 ```
 
 This runs **Vite (UI)**, the **API** on port `3001` (or `PORT`), and the **ingest worker** (BullMQ) together. The dev server proxies `/api/*` to the API. Open [http://localhost:3000](http://localhost:3000).
@@ -74,9 +74,9 @@ This runs **Vite (UI)**, the **API** on port `3001` (or `PORT`), and the **inges
 ## Running Tests
 
 ```bash
-npm test                 # Unit tests
-npm run test:integration # Integration tests (BullMQ + real Redis; start Redis first)
-npm run test:e2e         # Playwright (needs Redis, same as `npm run dev`)
+pnpm test                 # Unit tests
+pnpm run test:integration # Integration tests (BullMQ + real Redis; start Redis first)
+pnpm run test:e2e         # Playwright (needs Redis, same as `pnpm run dev`)
 ```
 
 The integration suite expects Redis; use `docker compose up -d` (or any Redis on `REDIS_URL`).
@@ -84,13 +84,13 @@ The integration suite expects Redis; use `docker compose up -d` (or any Redis on
 First-time Playwright setup:
 
 ```bash
-npx playwright install chromium
+pnpm exec playwright install chromium
 ```
 
 ## Production build (local check)
 
 ```bash
-npm run build:all
+pnpm run build:all
 NODE_ENV=production PORT=3001 node dist/server/api.js
 ```
 
@@ -105,7 +105,7 @@ This serves the SPA at `/` and the API at `/api/*` on the same port.
 1. In Coolify, add a **Redis** service (not publicly exposed) on the internal network.
 2. **Application: API** — build from the repo `Dockerfile`. Start command: `node dist/server/api.js`. Expose port `3001`. Attach your domain; Coolify/Traefik terminates TLS. Set `PORT=3001` and `NODE_ENV=production`.
 3. **Application: worker** — same image and repo. Start command: `node dist/server/worker.js`. No public port. Set `WORKER_CONCURRENCY=3` (tunable).
-4. **Build arguments:** pass `VITE_CLERK_PUBLISHABLE_KEY` (and any other `VITE_*` required at build time) as Docker build args in Coolify so `npm run build` embeds them in the SPA.
+4. **Build arguments:** pass `VITE_CLERK_PUBLISHABLE_KEY` (and any other `VITE_*` required at build time) as Docker build args in Coolify so `pnpm run build` embeds them in the SPA.
 5. **Runtime env (shared on both app and worker):** `STORAGE=s3`, `S3_BUCKET`, `S3_ENDPOINT`, `S3_REGION`, `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `REDIS_URL` (e.g. `redis://redis:6379` to match your Redis service name), `CLERK_SECRET_KEY`, `CLERK_JWT_KEY`, `EXTRACTION_PROVIDER`, `OPENAI_API_KEY` / `ANTHROPIC_API_KEY`, `VERIFY_EXPLANATIONS` as needed.
 
 **Pre-built image (CI → GitHub Container Registry).** The workflow in `.github/workflows/ci.yml` builds the same `Dockerfile` and **pushes** to **GHCR** on pushes to the repo (not on pull requests). The image is `ghcr.io/<github-owner-lowercase>/<repo>:latest` (on `main` / `master` only), plus per-branch and SHA tags. In GitHub, add a repository **Actions** secret `VITE_CLERK_PUBLISHABLE_KEY` with your publishable key so the baked SPA matches production Clerk. In Coolify, add a second resource type **Docker image** (or your UI’s “pull from registry” option): set registry to `ghcr.io`, image to `owner/repo`, tag to `latest` (or a commit SHA for pinning), and authenticate with a GitHub **personal access token** that has `read:packages` (and access to that package, if it is private). If the package is public, you may not need a token for read-only pull. The same `node dist/server/api.js` / `node dist/server/worker.js` start commands and runtime env as above apply; you skip Coolify’s “build from Dockerfile” step for the image.
