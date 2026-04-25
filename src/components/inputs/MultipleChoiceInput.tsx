@@ -42,7 +42,7 @@ export function MultipleChoiceInput({
               type="button"
               onClick={() => toggle(choice.id)}
               disabled={disabled}
-              className={`min-h-[44px] rounded-xl border-2 px-4 py-2 text-left font-medium transition-all duration-150 focus-visible:outline-none disabled:opacity-60 ${
+              className={`min-h-[44px] rounded-xl border-2 px-4 py-2 text-left font-medium transition-all duration-150 focus-visible:outline-hidden disabled:opacity-60 ${
                 selected
                   ? "border-primary bg-primary/10 text-foreground dark:bg-primary/20"
                   : "border-zinc-200 bg-card text-foreground hover:border-primary/50 hover:bg-primary/5 dark:border-zinc-600"
