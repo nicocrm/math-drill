@@ -1,7 +1,7 @@
 # Phased spec: guard against wrong correct answers
 
 Date: 2026-04-24
-Status: Spec (not an implementation plan)
+Status: Phases 1 and 2 implemented; Phase 3 pending
 Supersedes: `2026-04-24-guard-wrong-correct-answers.md` (kept for background)
 
 This spec defines **what** each phase must deliver and how to tell if it
