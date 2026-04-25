@@ -124,17 +124,17 @@ export default function ResultsPage() {
                     </div>
                     <div className="flex flex-wrap gap-2 text-sm">
                       {answer.isCorrect === true && (
-                        <span className="rounded bg-success/20 px-2 py-0.5 font-medium text-success">
+                        <span className="rounded-sm bg-success/20 px-2 py-0.5 font-medium text-success">
                           ✓ Correct
                         </span>
                       )}
                       {answer.isCorrect === false && (
-                        <span className="rounded bg-error/20 px-2 py-0.5 font-medium text-error">
+                        <span className="rounded-sm bg-error/20 px-2 py-0.5 font-medium text-error">
                           ✗ Incorrect
                         </span>
                       )}
                       {answer.isCorrect === null && q.type === "open" && (
-                        <span className="rounded bg-muted px-2 py-0.5 text-muted-foreground">
+                        <span className="rounded-sm bg-muted px-2 py-0.5 text-muted-foreground">
                           Not graded
                         </span>
                       )}

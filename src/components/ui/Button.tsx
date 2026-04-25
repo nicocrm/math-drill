@@ -20,7 +20,7 @@ type ButtonProps = ButtonAsButton | ButtonAsLink;
 
 const variantStyles = {
   primary:
-    "bg-primary text-primary-foreground shadow-sm hover:bg-primary-hover hover:shadow-md",
+    "bg-primary text-primary-foreground shadow-xs hover:bg-primary-hover hover:shadow-md",
   secondary: "bg-muted text-foreground hover:bg-muted/80",
   outline:
     "border-2 border-primary text-primary hover:bg-primary hover:text-primary-foreground",
@@ -42,7 +42,7 @@ export function Button({
   ...props
 }: ButtonProps) {
   const base =
-    "inline-flex items-center justify-center font-medium transition-all duration-150 focus-visible:outline-none disabled:opacity-50 disabled:pointer-events-none active:scale-[0.98]";
+    "inline-flex items-center justify-center font-medium transition-all duration-150 focus-visible:outline-hidden disabled:opacity-50 disabled:pointer-events-none active:scale-[0.98]";
 
   const combined = `${base} ${variantStyles[variant]} ${sizeStyles[size]} ${className}`;
 
