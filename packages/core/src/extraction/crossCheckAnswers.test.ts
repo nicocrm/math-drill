@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { crossCheckAnswers, type DemotionRecord } from "./crossCheckAnswers";
+import { parseAndValidateExerciseSet } from "./prompts";
 import type { Question } from "../types/exercise";
 
 function makeNumericQuestion(overrides: Partial<Question> = {}): Question {
@@ -218,7 +219,6 @@ describe("crossCheckAnswers - passthrough types", () => {
 
 describe("crossCheckAnswers - integration with parseAndValidateExerciseSet", () => {
   it("a synthetic response with contradictory answerMath/canonicalValue is demoted to open", async () => {
-    const { parseAndValidateExerciseSet } = await import("./prompts");
     const raw = JSON.stringify({
       id: "ex-bad",
       filename: "test.pdf",
@@ -247,7 +247,6 @@ describe("crossCheckAnswers - integration with parseAndValidateExerciseSet", () 
   });
 
   it("a synthetic response with mismatched multiple_choice flags is demoted to open", async () => {
-    const { parseAndValidateExerciseSet } = await import("./prompts");
     const raw = JSON.stringify({
       id: "ex-bad-mc",
       filename: "test.pdf",
