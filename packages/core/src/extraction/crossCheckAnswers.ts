@@ -180,8 +180,14 @@ function checkMultipleChoice(q: Question): CheckResult {
     (c) => c.correct === null || c.correct === undefined
   );
   if (hasMissingFlags) {
-    // Phase 1 shape validation should have caught this, but be defensive
-    return null; // cannot cross-check without flags
+    return {
+      reason: "multiple_choice choice(s) missing correct flag; cannot cross-check",
+      conflictingValues: {
+        choicesMissingFlags: choices
+          .filter(c => c.correct == null)
+          .map(c => c.id),
+      },
+    };
   }
 
   const flaggedIds = choices

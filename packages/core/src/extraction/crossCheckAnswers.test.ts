@@ -153,6 +153,23 @@ describe("crossCheckAnswers - multiple_choice", () => {
     expect(demotions[0].reason).toContain("do not match answerMath ids");
   });
 
+  it("demotes when choices are missing correct flags", () => {
+    const q = makeMultipleChoiceQuestion({
+      choices: [
+        { id: "a", latex: "1" }, // no correct flag
+        { id: "b", latex: "-1", correct: false },
+      ],
+      answerMath: ["a"],
+    });
+    const demotions: DemotionRecord[] = [];
+    const result = crossCheckAnswers([q], "ex-1", demotions);
+    expect(result[0].type).toBe("open");
+    expect(demotions[0].reason).toContain("missing correct flag");
+    expect(demotions[0].conflictingValues).toMatchObject({
+      choicesMissingFlags: ["a"],
+    });
+  });
+
   it("passes multiple-answer multiple_choice", () => {
     const q = makeMultipleChoiceQuestion({
       choices: [
