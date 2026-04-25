@@ -18,7 +18,7 @@
     "test:integration": "vitest run --config vitest.integration.config.ts",
     "start:api": "node dist/server/api.js",
     "start:worker": "node dist/server/worker.js",
-    "prepare": "husky"
+    "prepare": "husky || true"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.78.0",
