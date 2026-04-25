@@ -65,10 +65,10 @@ describe("validateAnswerMath", () => {
     ).not.toThrow();
   });
 
-  it("throws for numeric with invalid answerMath", () => {
+  it("accepts any string answerMath for numeric type (evaluability checked in Phase 2)", () => {
     expect(() =>
       validateAnswerMath({ id: "q1", type: "numeric", answerMath: "not a number", canonicalValue: 0 })
-    ).toThrow("not a valid mathjs-evaluable numeric expression");
+    ).not.toThrow();
   });
 
   it("throws for numeric without canonicalValue", () => {
@@ -234,5 +234,32 @@ describe("parseAndValidateExerciseSet - not_math_exercise sentinel", () => {
       ],
     });
     expect(() => parseAndValidateExerciseSet(raw)).not.toThrow();
+  });
+
+  it("demotes numeric question with unevaluable answerMath to open (Phase 2)", () => {
+    const raw = JSON.stringify({
+      id: "00000000-0000-0000-0000-000000000002",
+      filename: "test.pdf",
+      title: "Test",
+      subject: "Math",
+      createdAt: new Date().toISOString(),
+      sections: [{ id: "s1", label: "Section 1", maxPoints: 10 }],
+      questions: [
+        {
+          id: "q1",
+          type: "numeric",
+          section: "s1",
+          points: 2,
+          prompt: "What is $x+1$?",
+          answerMath: "x + 1", // unevaluable — Phase 2 demotes
+          answerLatex: "x+1",
+          canonicalValue: 2,
+          requiresSteps: false,
+        },
+      ],
+    });
+    const result = parseAndValidateExerciseSet(raw);
+    expect(result.questions[0].type).toBe("open");
+    expect(result.questions[0].answerMath).toBeNull();
   });
 });
