@@ -17,7 +17,8 @@
     "test:e2e": "playwright test",
     "test:integration": "vitest run --config vitest.integration.config.ts",
     "start:api": "node dist/server/api.js",
-    "start:worker": "node dist/server/worker.js"
+    "start:worker": "node dist/server/worker.js",
+    "prepare": "husky"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.78.0",
@@ -51,6 +52,7 @@
     "esbuild": "^0.28.0",
     "eslint": "^9.7.0",
     "eslint-plugin-react-hooks": "^5.0.0",
+    "husky": "^9.1.7",
     "multer": "^2.1.1",
     "postcss": "^8",
     "tailwindcss": "^4.2.4",

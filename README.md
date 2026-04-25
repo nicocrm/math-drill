@@ -49,6 +49,8 @@ pnpm run dev
 
 This runs **Vite (UI)**, the **API** on port `3001` (or `PORT`), and the **ingest worker** (BullMQ) together. The dev server proxies `/api/*` to the API. Open [http://localhost:3000](http://localhost:3000).
 
+After `pnpm install`, [Husky](https://typicode.github.io/husky/) installs a **pre-commit** hook that runs `pnpm lint`. To skip hooks in an emergency (use sparingly): `HUSKY=0 git commit …`.
+
 ## Environment Variables
 
 | Variable | Default | Description |

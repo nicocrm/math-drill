@@ -24,6 +24,7 @@ jobs:
           node-version: "22"
           cache: "pnpm"
       - run: pnpm install --frozen-lockfile
+      - run: pnpm lint
       - run: pnpm test
         env:
           REDIS_URL: redis://127.0.0.1:6379
