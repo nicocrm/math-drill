@@ -117,6 +117,23 @@ describe("crossCheckAnswers - numeric/expression", () => {
     const result = crossCheckAnswers([q], "ex-1");
     expect(result[0].type).toBe("numeric");
   });
+
+  it("demotes when answerMath evaluates to Infinity (e.g. 1/0)", () => {
+    const q = makeNumericQuestion({ answerMath: "1/0", canonicalValue: 0 });
+    const demotions: DemotionRecord[] = [];
+    const result = crossCheckAnswers([q], "ex-1", demotions);
+    expect(result[0].type).toBe("open");
+    expect(demotions[0].reason).toContain("not a finite number");
+    expect(demotions[0].conflictingValues).toMatchObject({ answerMath: "1/0", evaluated: Infinity });
+  });
+
+  it("demotes when answerMath evaluates to NaN (e.g. 0/0)", () => {
+    const q = makeNumericQuestion({ answerMath: "0/0", canonicalValue: 0 });
+    const demotions: DemotionRecord[] = [];
+    const result = crossCheckAnswers([q], "ex-1", demotions);
+    expect(result[0].type).toBe("open");
+    expect(demotions[0].reason).toContain("not a finite number");
+  });
 });
 
 describe("crossCheckAnswers - multiple_choice", () => {

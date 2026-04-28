@@ -140,6 +140,13 @@ function checkNumericExpression(q: Question): CheckResult {
     };
   }
 
+  if (!Number.isFinite(evaluated)) {
+    return {
+      reason: `answerMath "${s}" evaluates to ${evaluated} (not a finite number)`,
+      conflictingValues: { answerMath: s, evaluated },
+    };
+  }
+
   if (!numericallySame(evaluated, canonical)) {
     return {
       reason: `answerMath evaluates to ${evaluated} but canonicalValue is ${canonical} (relative difference exceeds tolerance)`,
