@@ -8,6 +8,7 @@ export type QuestionType =
 export interface Choice {
   id: string; // e.g. "a", "b", "c"
   latex: string; // KaTeX-renderable string, e.g. "\\left(\\frac{2}{3}\\right)^2"
+  correct?: boolean; // Phase 1: per-choice correctness flag (used in extraction pipeline)
 }
 
 export interface Question {
@@ -19,6 +20,7 @@ export interface Question {
   choices?: Choice[]; // For multiple_choice only
   answerMath: string | string[] | null;
   answerLatex?: string; // KaTeX display string for the correct answer
+  canonicalValue?: number; // Phase 1: canonical numeric value for numeric/expression questions (used in extraction pipeline)
   requiresSteps: boolean;
   requiresExample?: boolean; // For true_false: if true, student must provide a counterexample when answering "false"
   hint?: string; // Optional teacher hint
