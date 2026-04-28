@@ -45,33 +45,38 @@ export async function handle(
   const preflight = handleCorsPreflightMaybe(event);
   if (preflight) return preflight;
 
-  const method = (event.httpMethod ?? "GET").toUpperCase();
-  const path = normalisePath(event.path ?? "");
+  try {
+    const method = (event.httpMethod ?? "GET").toUpperCase();
+    const path = normalisePath(event.path ?? "");
 
-  // GET /api/ingest/status
-  if (method === "GET" && path === "ingest/status") {
-    return handleGetIngestStatus(event);
+    // GET /api/ingest/status
+    if (method === "GET" && path === "ingest/status") {
+      return handleGetIngestStatus(event);
+    }
+
+    // POST /api/ingest
+    if (method === "POST" && path === "ingest") {
+      return handlePostIngest(event);
+    }
+
+    // GET /api/exercises  (exact, no trailing segment)
+    if (method === "GET" && path === "exercises") {
+      return handleGetExercises(event);
+    }
+
+    // GET /api/exercises/{id}
+    if (method === "GET" && path.startsWith("exercises/")) {
+      return handleGetExercise(event);
+    }
+
+    // DELETE /api/exercises/{id}
+    if (method === "DELETE" && path.startsWith("exercises/")) {
+      return handleDeleteExercise(event);
+    }
+
+    return jsonResponse(404, { error: "Not found" });
+  } catch (err) {
+    console.error("[api] Unhandled error:", err);
+    return jsonResponse(500, { error: "Internal server error" });
   }
-
-  // POST /api/ingest
-  if (method === "POST" && path === "ingest") {
-    return handlePostIngest(event);
-  }
-
-  // GET /api/exercises  (exact, no trailing segment)
-  if (method === "GET" && path === "exercises") {
-    return handleGetExercises(event);
-  }
-
-  // GET /api/exercises/{id}
-  if (method === "GET" && path.startsWith("exercises/")) {
-    return handleGetExercise(event);
-  }
-
-  // DELETE /api/exercises/{id}
-  if (method === "DELETE" && path.startsWith("exercises/")) {
-    return handleDeleteExercise(event);
-  }
-
-  return jsonResponse(404, { error: "Not found" });
 }
