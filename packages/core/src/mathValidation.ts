@@ -1,6 +1,4 @@
-import { create, all } from "mathjs";
-
-const math = create(all);
+import { math } from "./extraction/mathInstance";
 
 export function checkFraction(
   studentInput: string,
