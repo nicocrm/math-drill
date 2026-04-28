@@ -235,7 +235,7 @@ describe("crossCheckAnswers - passthrough types", () => {
 });
 
 describe("crossCheckAnswers - integration with parseAndValidateExerciseSet", () => {
-  it("a synthetic response with contradictory answerMath/canonicalValue is demoted to open", async () => {
+  it("a synthetic response with contradictory answerMath/canonicalValue is demoted to open", () => {
     const raw = JSON.stringify({
       id: "ex-bad",
       filename: "test.pdf",
@@ -263,7 +263,7 @@ describe("crossCheckAnswers - integration with parseAndValidateExerciseSet", () 
     expect(result.questions[0].answerMath).toBeNull();
   });
 
-  it("a synthetic response with mismatched multiple_choice flags is demoted to open", async () => {
+  it("a synthetic response with mismatched multiple_choice flags is demoted to open", () => {
     const raw = JSON.stringify({
       id: "ex-bad-mc",
       filename: "test.pdf",
