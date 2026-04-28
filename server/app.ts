@@ -156,18 +156,18 @@ function registerApiRoutes(
         const jobId = uuidv4();
         const exerciseId = uuidv4();
         const safeName = filename.replace(/[^a-zA-Z0-9.-]/g, "_");
-        const s3Key = `${jobId}-${safeName}`;
+        const documentId = `${jobId}-${safeName}`;
 
         const jobStore = getJobStatusStore();
         await jobStore.set(jobId, { status: "pending", progress: 0 });
         const fileStorage = getFileStorage();
         await jobStore.updateProgress(jobId, "saving");
-        await fileStorage.upload(s3Key, pdfBuffer);
+        await fileStorage.upload(documentId, pdfBuffer);
 
         const payload: IngestPayload = {
           jobId,
           exerciseId,
-          s3Key,
+          documentId,
           filename,
           userId: auth.userId,
         };

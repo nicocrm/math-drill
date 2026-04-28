@@ -80,6 +80,6 @@ describe("POST /api/ingest", () => {
     expect(opts.backoff).toEqual({ type: "exponential", delay: 5000 });
     expect(payload.userId).toBe("auth-user-1");
     expect(payload.filename).toBe("quiz.pdf");
-    expect(payload.s3Key).toBe(`${out.jobId}-quiz.pdf`);
+    expect(payload.documentId).toBe(`${out.jobId}-quiz.pdf`);
   });
 });

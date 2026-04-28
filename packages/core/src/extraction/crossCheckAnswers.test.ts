@@ -241,7 +241,7 @@ describe("crossCheckAnswers - integration with parseAndValidateExerciseSet", () 
       ],
     });
     vi.spyOn(console, "warn").mockImplementation(() => {});
-    const result = parseAndValidateExerciseSet(raw);
+    const result = await parseAndValidateExerciseSet(raw);
     expect(result.questions[0].type).toBe("open");
     expect(result.questions[0].answerMath).toBeNull();
   });
@@ -272,7 +272,7 @@ describe("crossCheckAnswers - integration with parseAndValidateExerciseSet", () 
       ],
     });
     vi.spyOn(console, "warn").mockImplementation(() => {});
-    const result = parseAndValidateExerciseSet(raw);
+    const result = await parseAndValidateExerciseSet(raw);
     expect(result.questions[0].type).toBe("open");
     expect(result.questions[0].answerMath).toBeNull();
   });

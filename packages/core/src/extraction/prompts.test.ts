@@ -138,7 +138,7 @@ const FIXTURE_DIR = join(
 );
 
 describe("parseAndValidateExerciseSet - LaTeX in valid JSON", () => {
-  it("parses correctly escaped LaTeX (\\\\sqrt, \\\\frac) from valid JSON", () => {
+  it("parses correctly escaped LaTeX (\\\\sqrt, \\\\frac) from valid JSON", async () => {
     // With structured output the model returns properly escaped JSON
     const raw = JSON.stringify({
       id: "ex-1", filename: "t.pdf", title: "T", subject: "m",
@@ -152,12 +152,12 @@ describe("parseAndValidateExerciseSet - LaTeX in valid JSON", () => {
         requiresSteps: false,
       }],
     });
-    const result = parseAndValidateExerciseSet(raw);
+    const result = await parseAndValidateExerciseSet(raw);
     expect(result.questions[0].prompt).toBe("What is $\\sqrt{2}$?");
     expect(result.questions[0].answerLatex).toBe("\\sqrt{2}");
   });
 
-  it("parses valid JSON escapes (\\n, \\t) correctly", () => {
+  it("parses valid JSON escapes (\\n, \\t) correctly", async () => {
     const raw = JSON.stringify({
       id: "ex-1", filename: "t.pdf", title: "T", subject: "m",
       createdAt: "2025-01-01T00:00:00Z",
@@ -170,28 +170,28 @@ describe("parseAndValidateExerciseSet - LaTeX in valid JSON", () => {
         requiresSteps: false,
       }],
     });
-    const result = parseAndValidateExerciseSet(raw);
+    const result = await parseAndValidateExerciseSet(raw);
     expect(result.questions[0].prompt).toBe("Line1\nLine2");
   });
 });
 
 describe("parseAndValidateExerciseSet - explanation", () => {
-  it("accepts exercise with explanations", () => {
+  it("accepts exercise with explanations", async () => {
     const raw = readFileSync(
       join(FIXTURE_DIR, "mock-exercise.json"),
       "utf-8"
     );
-    const result = parseAndValidateExerciseSet(raw);
+    const result = await parseAndValidateExerciseSet(raw);
     const withExplanation = result.questions.filter((q) => q.explanation);
     expect(withExplanation.length).toBeGreaterThan(0);
   });
 
-  it("preserves explanation field", () => {
+  it("preserves explanation field", async () => {
     const raw = readFileSync(
       join(FIXTURE_DIR, "mock-exercise.json"),
       "utf-8"
     );
-    const result = parseAndValidateExerciseSet(raw);
+    const result = await parseAndValidateExerciseSet(raw);
     expect(result.questions[0].explanation).toBe(
       "Addition combines two numbers to find their total."
     );
@@ -199,19 +199,19 @@ describe("parseAndValidateExerciseSet - explanation", () => {
 });
 
 describe("parseAndValidateExerciseSet - not_math_exercise sentinel", () => {
-  it("throws with model message when error is not_math_exercise", () => {
+  it("throws with model message when error is not_math_exercise", async () => {
     const raw = JSON.stringify({ error: "not_math_exercise", message: "This is a recipe book." });
-    expect(() => parseAndValidateExerciseSet(raw)).toThrow("This is a recipe book.");
+    await expect(parseAndValidateExerciseSet(raw)).rejects.toThrow("This is a recipe book.");
   });
 
-  it("throws a fallback message when no message field", () => {
+  it("throws a fallback message when no message field", async () => {
     const raw = JSON.stringify({ error: "not_math_exercise" });
-    expect(() => parseAndValidateExerciseSet(raw)).toThrow(
+    await expect(parseAndValidateExerciseSet(raw)).rejects.toThrow(
       "The uploaded document does not appear to contain math exercises."
     );
   });
 
-  it("does not throw for a normal exercise set", () => {
+  it("does not throw for a normal exercise set", async () => {
     const raw = JSON.stringify({
       id: "00000000-0000-0000-0000-000000000001",
       filename: "test.pdf",
@@ -233,10 +233,10 @@ describe("parseAndValidateExerciseSet - not_math_exercise sentinel", () => {
         },
       ],
     });
-    expect(() => parseAndValidateExerciseSet(raw)).not.toThrow();
+    await expect(parseAndValidateExerciseSet(raw)).resolves.not.toThrow();
   });
 
-  it("demotes numeric question with unevaluable answerMath to open (Phase 2)", () => {
+  it("demotes numeric question with unevaluable answerMath to open (Phase 2)", async () => {
     const raw = JSON.stringify({
       id: "00000000-0000-0000-0000-000000000002",
       filename: "test.pdf",
@@ -258,7 +258,7 @@ describe("parseAndValidateExerciseSet - not_math_exercise sentinel", () => {
         },
       ],
     });
-    const result = parseAndValidateExerciseSet(raw);
+    const result = await parseAndValidateExerciseSet(raw);
     expect(result.questions[0].type).toBe("open");
     expect(result.questions[0].answerMath).toBeNull();
   });

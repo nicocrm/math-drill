@@ -1,4 +1,6 @@
 import { writeFileSync } from "fs";
+import { mkdir } from "fs/promises";
+import path from "path";
 import type { ExerciseSet } from "../types/exercise";
 import { exerciseSetSchema } from "../exerciseSchema";
 import { crossCheckAnswers } from "./crossCheckAnswers";
@@ -132,12 +134,14 @@ export function validateAnswerMath(question: {
   }
 }
 
-export function parseAndValidateExerciseSet(raw: string): ExerciseSet {
+export async function parseAndValidateExerciseSet(raw: string, documentId?: string): Promise<ExerciseSet> {
   // Structured output from OpenAI is guaranteed to be valid JSON.
   let parsed: unknown;
-  if (process.env.DEBUG_LLM_OUTPUT === "true") {
-    const dumpPath = `/tmp/llm-parse-error-${Date.now()}.txt`;
-    writeFileSync(dumpPath, `=== RAW ===\n${raw}\n`);
+  if (process.env.DEBUG_LLM_OUTPUT === "true" && documentId) {
+    const intakeDir = process.env.INTAKE_DIR ?? path.join(process.cwd(), "intake");
+    await mkdir(intakeDir, { recursive: true });
+    const jsonPath = path.join(intakeDir, documentId.replace(/\.pdf$/, ".json"));
+    writeFileSync(jsonPath, raw);
   }
   try {
     parsed = JSON.parse(raw);

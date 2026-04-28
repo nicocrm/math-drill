@@ -55,13 +55,13 @@ describe("handleIngest", () => {
   });
 
   it("processes an ingest job end-to-end", async () => {
-    const s3Key = "test-job-doc.pdf";
-    await writeFile(join(testIntakeDir, s3Key), Buffer.from("fake-pdf-content"));
+    const documentId = "test-job-doc.pdf";
+    await writeFile(join(testIntakeDir, documentId), Buffer.from("fake-pdf-content"));
 
     const payload: IngestPayload = {
       jobId: "job-123",
       exerciseId: "ex-456",
-      s3Key,
+      documentId,
       filename: "test.pdf",
       userId: "user-789",
     };
@@ -89,7 +89,7 @@ describe("handleIngest", () => {
     const payload: IngestPayload = {
       jobId: "job-fail",
       exerciseId: "ex-fail",
-      s3Key: "nonexistent.pdf",
+      documentId: "nonexistent.pdf",
       filename: "missing.pdf",
       userId: "user-1",
     };

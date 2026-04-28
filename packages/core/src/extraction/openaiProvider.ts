@@ -9,7 +9,8 @@ const OPENAI_MODEL = "gpt-5.4-mini";
 
 export async function generateExercisesFromPdfOpenAI(
   pdfBase64: string,
-  filename: string
+  filename: string,
+  documentId?: string
 ): Promise<ExerciseSet> {
   const client = new OpenAI();
 
@@ -45,6 +46,6 @@ export async function generateExercisesFromPdfOpenAI(
     throw new Error("OpenAI did not return text content");
   }
 
-  const exerciseSet = parseAndValidateExerciseSet(outputText);
+  const exerciseSet = await parseAndValidateExerciseSet(outputText, documentId);
   return verifyExplanations(exerciseSet);
 }

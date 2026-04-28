@@ -4,7 +4,7 @@ import { getExerciseStorage, getFileStorage, getJobStatusStore } from "../env";
 export interface IngestPayload {
   jobId: string;
   exerciseId: string;
-  s3Key: string;
+  documentId: string;
   filename: string;
   userId: string;
 }
@@ -13,22 +13,22 @@ export interface IngestPayload {
  * Core ingest — shared by the API (enqueue) / worker (process) and tests.
  */
 export async function handleIngest(payload: IngestPayload): Promise<void> {
-  const { jobId, exerciseId, s3Key, filename, userId } = payload;
+  const { jobId, exerciseId, documentId, filename, userId } = payload;
   const jobStore = getJobStatusStore();
   const fileStorage = getFileStorage();
   const exerciseStorage = getExerciseStorage();
 
-  console.log(`[ingest] Starting job ${jobId}: file=${filename}, s3Key=${s3Key}`);
+  console.log(`[ingest] Starting job ${jobId}: file=${filename}, documentId=${documentId}`);
 
   try {
     await jobStore.updateProgress(jobId, "extracting");
-    const pdfBuffer = await fileStorage.download(s3Key);
+    const pdfBuffer = await fileStorage.download(documentId);
     const pdfBase64 = pdfBuffer.toString("base64");
 
     const provider = process.env.EXTRACTION_PROVIDER?.toLowerCase() ?? "anthropic";
     console.log(`[ingest] Job ${jobId}: calling extraction provider=${provider}`);
 
-    const exercise = await generateExercisesFromPdf(pdfBase64, filename);
+    const exercise = await generateExercisesFromPdf(pdfBase64, filename, documentId);
     await jobStore.updateProgress(jobId, "validating");
 
     exercise.id = exerciseId;
