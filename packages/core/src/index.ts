@@ -24,6 +24,7 @@ export {
 export { SYSTEM_PROMPT, validateAnswerMath, parseAndValidateExerciseSet } from "./extraction/prompts";
 export { generateExercisesFromPdfOpenAI } from "./extraction/openaiProvider";
 export { verifyExplanations } from "./extraction/verifyExplanations";
+export type { DemotionRecord } from "./extraction/crossCheckAnswers";
 export { generateExercisesFromPdf } from "./generateExercisesFromPdf";
 export type { ExtractionProvider } from "./generateExercisesFromPdf";
 
