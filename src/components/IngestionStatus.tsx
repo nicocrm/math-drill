@@ -19,13 +19,12 @@ interface StatusData {
 
 export function IngestionStatus({ jobId, initialStatus, onComplete, onError }: IngestionStatusProps) {
   const navigate = useNavigate();
-  const [status, setStatus] = useState<StatusData | null>(initialStatus ?? null);
+  const [status, setStatus] = useState<StatusData | null>(() => initialStatus ?? null);
   const [pollError, setPollError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!jobId) return;
 
-    setStatus(initialStatus ?? null);
     setPollError(null);
 
     const poll = async () => {
