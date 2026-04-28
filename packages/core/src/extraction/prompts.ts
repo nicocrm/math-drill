@@ -82,6 +82,14 @@ export function validateAnswerMath(question: {
         (c) => c.correct === null || c.correct === undefined
       );
       if (missingFlag) {
+        // Phase 1 hard-rejects a missing correct flag on any choice because
+        // this is a structural contract violation (the LLM was explicitly told
+        // every choice must carry the flag).  A single bad choice fails the
+        // whole exercise set so the caller can log and retry.  This is
+        // intentionally stricter than Phase 2 (crossCheckAnswers), which
+        // demotes only the individual question rather than rejecting the set,
+        // because Phase 2 handles *semantic* inconsistency between two
+        // otherwise-valid fields, not a missing required field.
         throw new Error(
           `Question ${question.id}: multiple_choice choice "${missingFlag.id}" is missing the required correct flag`
         );
