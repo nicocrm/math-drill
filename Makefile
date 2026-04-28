@@ -1,7 +1,7 @@
 -include .env
 export
 
-FUNCTIONS := get-exercises get-exercise delete-exercise post-ingest get-ingest-status ingest-worker
+FUNCTIONS := api ingest-worker
 DIST      := dist/functions
 ZIPS      := $(addprefix $(DIST)/,$(addsuffix .zip,$(FUNCTIONS)))
 
@@ -13,11 +13,7 @@ all: functions
 # Requires: cd terraform && terraform init && terraform apply
 build-frontend:
 	VITE_CLERK_PUBLISHABLE_KEY=$$(terraform -chdir=terraform output -raw clerk_publishable_key 2>/dev/null) \
-	VITE_GET_EXERCISES_URL=//$$(terraform -chdir=terraform output -raw get_exercises_url) \
-	VITE_GET_EXERCISE_URL=//$$(terraform -chdir=terraform output -raw get_exercise_url) \
-	VITE_DELETE_EXERCISE_URL=//$$(terraform -chdir=terraform output -raw delete_exercise_url) \
-	VITE_POST_INGEST_URL=//$$(terraform -chdir=terraform output -raw post_ingest_url) \
-	VITE_GET_INGEST_STATUS_URL=//$$(terraform -chdir=terraform output -raw get_ingest_status_url) \
+	VITE_API_URL=//$$(terraform -chdir=terraform output -raw api_url) \
 	npm run build
 
 # Sync built frontend to the Scaleway Object Storage bucket via S3-compatible API.

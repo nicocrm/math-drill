@@ -177,68 +177,16 @@ resource "scaleway_function_namespace" "main" {
 
 # --- Functions ---
 
-resource "scaleway_function" "get_exercises" {
+resource "scaleway_function" "api" {
   namespace_id = scaleway_function_namespace.main.id
-  name         = "get-exercises"
-  runtime      = "node22"
-  handler      = "handler.handle"
-  privacy      = "public"
-  memory_limit = 256
-  timeout      = 30
-  zip_file     = "${path.module}/../dist/functions/get-exercises.zip"
-  zip_hash     = filesha256("${path.module}/../dist/functions/get-exercises.zip")
-  deploy       = true
-}
-
-resource "scaleway_function" "get_exercise" {
-  namespace_id = scaleway_function_namespace.main.id
-  name         = "get-exercise"
-  runtime      = "node22"
-  handler      = "handler.handle"
-  privacy      = "public"
-  memory_limit = 256
-  timeout      = 30
-  zip_file     = "${path.module}/../dist/functions/get-exercise.zip"
-  zip_hash     = filesha256("${path.module}/../dist/functions/get-exercise.zip")
-  deploy       = true
-}
-
-resource "scaleway_function" "delete_exercise" {
-  namespace_id = scaleway_function_namespace.main.id
-  name         = "delete-exercise"
-  runtime      = "node22"
-  handler      = "handler.handle"
-  privacy      = "public"
-  memory_limit = 256
-  timeout      = 30
-  zip_file     = "${path.module}/../dist/functions/delete-exercise.zip"
-  zip_hash     = filesha256("${path.module}/../dist/functions/delete-exercise.zip")
-  deploy       = true
-}
-
-resource "scaleway_function" "post_ingest" {
-  namespace_id = scaleway_function_namespace.main.id
-  name         = "post-ingest"
+  name         = "api"
   runtime      = "node22"
   handler      = "handler.handle"
   privacy      = "public"
   memory_limit = 512
   timeout      = 60
-  zip_file     = "${path.module}/../dist/functions/post-ingest.zip"
-  zip_hash     = filesha256("${path.module}/../dist/functions/post-ingest.zip")
-  deploy       = true
-}
-
-resource "scaleway_function" "get_ingest_status" {
-  namespace_id = scaleway_function_namespace.main.id
-  name         = "get-ingest-status"
-  runtime      = "node22"
-  handler      = "handler.handle"
-  privacy      = "public"
-  memory_limit = 256
-  timeout      = 30
-  zip_file     = "${path.module}/../dist/functions/get-ingest-status.zip"
-  zip_hash     = filesha256("${path.module}/../dist/functions/get-ingest-status.zip")
+  zip_file     = "${path.module}/../dist/functions/api.zip"
+  zip_hash     = filesha256("${path.module}/../dist/functions/api.zip")
   deploy       = true
 }
 
@@ -268,24 +216,8 @@ resource "scaleway_function_trigger" "ingest_trigger" {
 
 # --- Outputs ---
 
-output "get_exercises_url" {
-  value = scaleway_function.get_exercises.domain_name
-}
-
-output "get_exercise_url" {
-  value = scaleway_function.get_exercise.domain_name
-}
-
-output "delete_exercise_url" {
-  value = scaleway_function.delete_exercise.domain_name
-}
-
-output "post_ingest_url" {
-  value = scaleway_function.post_ingest.domain_name
-}
-
-output "get_ingest_status_url" {
-  value = scaleway_function.get_ingest_status.domain_name
+output "api_url" {
+  value = scaleway_function.api.domain_name
 }
 
 output "sqs_queue_url" {
