@@ -15,9 +15,9 @@
       "points": 2,
       "prompt": "What is $2 + 2$?",
       "choices": [
-        { "id": "a", "latex": "3" },
-        { "id": "b", "latex": "4" },
-        { "id": "c", "latex": "5" }
+        { "id": "a", "latex": "3", "correct": false },
+        { "id": "b", "latex": "4", "correct": true },
+        { "id": "c", "latex": "5", "correct": false }
       ],
       "answerMath": ["b"],
       "answerLatex": "4",
@@ -43,6 +43,7 @@
       "prompt": "Simplify $\\frac{2}{4}$",
       "answerMath": "1/2",
       "answerLatex": "\\frac{1}{2}",
+      "canonicalValue": 0.5,
       "requiresSteps": false,
       "explanation": "To simplify a fraction, divide numerator and denominator by their greatest common factor."
     },
@@ -54,6 +55,7 @@
       "prompt": "Calculate $5 + 3$",
       "answerMath": "8",
       "answerLatex": "8",
+      "canonicalValue": 8,
       "requiresSteps": false
     },
     {

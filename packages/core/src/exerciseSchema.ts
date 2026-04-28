@@ -11,6 +11,7 @@ const questionTypeSchema = z.enum([
 const choiceSchema = z.object({
   id: z.string(),
   latex: z.string(),
+  correct: z.boolean().nullish().transform(v => v ?? undefined),
 });
 
 const questionSchema = z.object({
@@ -26,6 +27,7 @@ const questionSchema = z.object({
   requiresExample: z.boolean().nullish(),
   hint: z.string().nullish().transform(v => v ?? undefined),
   explanation: z.string().optional(),
+  canonicalValue: z.number().nullish().transform(v => v ?? undefined),
 });
 
 const sectionSchema = z.object({
@@ -46,6 +48,11 @@ export const exerciseSetSchema = z.object({
 
 export type ExerciseSetSchema = z.infer<typeof exerciseSetSchema>;
 
+const llmChoiceSchema = z.object({
+  id: z.string(),
+  latex: z.string(),
+  correct: z.boolean().nullable(),
+});
 /**
  * LLM-facing schemas: all fields required + nullable (no .optional/.nullish)
  * as required by OpenAI structured outputs / zodResponseFormat.
@@ -56,9 +63,10 @@ const llmQuestionSchema = z.object({
   section: z.string(),
   points: z.number(),
   prompt: z.string(),
-  choices: z.array(choiceSchema).nullable(),
+  choices: z.array(llmChoiceSchema).nullable(),
   answerMath: z.union([z.string(), z.array(z.string()), z.null()]),
   answerLatex: z.string().nullable(),
+  canonicalValue: z.number().nullable(),
   requiresSteps: z.boolean(),
   requiresExample: z.boolean().nullable(),
   hint: z.string().nullable(),
