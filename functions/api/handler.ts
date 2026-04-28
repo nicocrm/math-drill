@@ -51,27 +51,27 @@ export async function handle(
 
     // GET /api/ingest/status
     if (method === "GET" && path === "ingest/status") {
-      return handleGetIngestStatus(event);
+      return await handleGetIngestStatus(event);
     }
 
     // POST /api/ingest
     if (method === "POST" && path === "ingest") {
-      return handlePostIngest(event);
+      return await handlePostIngest(event);
     }
 
     // GET /api/exercises  (exact, no trailing segment)
     if (method === "GET" && path === "exercises") {
-      return handleGetExercises(event);
+      return await handleGetExercises(event);
     }
 
     // GET /api/exercises/{id}
     if (method === "GET" && path.startsWith("exercises/")) {
-      return handleGetExercise(event);
+      return await handleGetExercise(event);
     }
 
     // DELETE /api/exercises/{id}
     if (method === "DELETE" && path.startsWith("exercises/")) {
-      return handleDeleteExercise(event);
+      return await handleDeleteExercise(event);
     }
 
     return jsonResponse(404, { error: "Not found" });

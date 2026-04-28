@@ -121,5 +121,34 @@ describe("api/handler router", () => {
       const res = await handle(makeEvent("PUT", "/api/exercises"));
       expect(res.statusCode).toBe(404);
     });
+
+    it("returns 404 for POST /api/ingest/status (wrong method)", async () => {
+      const res = await handle(makeEvent("POST", "/api/ingest/status"));
+      expect(res.statusCode).toBe(404);
+      expect(handleGetIngestStatus).not.toHaveBeenCalled();
+    });
+
+    it("returns 404 for GET /api/ingest (no method match)", async () => {
+      const res = await handle(makeEvent("GET", "/api/ingest"));
+      expect(res.statusCode).toBe(404);
+      expect(handlePostIngest).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("event passthrough", () => {
+    it("passes the original event to the sub-handler unmodified", async () => {
+      const event = makeEvent("GET", "/api/exercises");
+      await handle(event);
+      expect(handleGetExercises).toHaveBeenCalledWith(event);
+    });
+  });
+
+  describe("error handling", () => {
+    it("returns 500 with JSON body when a sub-handler throws", async () => {
+      vi.mocked(handleGetExercises).mockRejectedValueOnce(new Error("storage timeout"));
+      const res = await handle(makeEvent("GET", "/api/exercises"));
+      expect(res.statusCode).toBe(500);
+      expect(JSON.parse(res.body ?? "{}")).toMatchObject({ error: "Internal server error" });
+    });
   });
 });
