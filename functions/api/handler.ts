@@ -29,10 +29,11 @@ import { handleCorsPreflightMaybe, jsonResponse } from "../lib/scaleway";
 function normalisePath(raw: string): string {
   // Remove leading and trailing slashes
   let p = raw.replace(/^\/+|\/+$/g, "");
-  // Strip optional leading "api/" segment
-  if (p === "api" || p.startsWith("api/")) {
-    p = p.slice(p.indexOf("/") + 1);
-    if (p === "api") p = ""; // edge case: "api" with no trailing slash
+  // Strip optional leading "api" segment
+  if (p === "api") {
+    p = "";
+  } else if (p.startsWith("api/")) {
+    p = p.slice(4); // skip "api/"
   }
   return p;
 }
