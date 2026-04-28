@@ -15,7 +15,7 @@ jobs:
           node-version: "22"
           cache: "npm"
       - run: npm install --frozen-lockfile
-      - run: npm lint
+      - run: npm run lint
       - run: npm test
       - run: npm run test:integration
       # make sure the build works
