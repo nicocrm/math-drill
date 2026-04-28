@@ -61,14 +61,7 @@ export function crossCheckAnswers(
         "[cross-check] Demoting question to open:",
         JSON.stringify(record)
       );
-      return {
-        ...q,
-        type: "open" as const,
-        answerMath: null,
-        answerLatex: undefined,
-        choices: undefined,
-        canonicalValue: undefined,
-      };
+      return demote(q);
     } catch (err) {
       // Unexpected error during cross-check — demote defensively
       const record: DemotionRecord = {
@@ -80,19 +73,23 @@ export function crossCheckAnswers(
       };
       demotions.push(record);
       console.error("[cross-check] Unexpected error, demoting:", JSON.stringify(record), err);
-      return {
-        ...q,
-        type: "open" as const,
-        answerMath: null,
-        answerLatex: undefined,
-        choices: undefined,
-        canonicalValue: undefined,
-      };
+      return demote(q);
     }
   });
 }
 
 type CheckResult = null | { reason: string; conflictingValues: Record<string, unknown> };
+
+function demote(q: Question): Question {
+  return {
+    ...q,
+    type: "open" as const,
+    answerMath: null,
+    answerLatex: undefined,
+    choices: undefined,
+    canonicalValue: undefined,
+  };
+}
 
 function checkQuestion(q: Question): CheckResult {
   if (q.type === "numeric" || q.type === "expression") {
